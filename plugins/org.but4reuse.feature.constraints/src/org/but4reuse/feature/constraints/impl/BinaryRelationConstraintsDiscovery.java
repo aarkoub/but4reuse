@@ -15,6 +15,9 @@ import org.but4reuse.adaptedmodel.helpers.AdaptedModelHelper;
 import org.but4reuse.adaptedmodel.manager.AdaptedModelManager;
 import org.but4reuse.adapters.IDependencyObject;
 import org.but4reuse.adapters.IElement;
+import org.but4reuse.feature.constraints.BasicExcludesConstraint;
+import org.but4reuse.feature.constraints.BasicRequiresConstraint;
+import org.but4reuse.feature.constraints.Constraint;
 import org.but4reuse.feature.constraints.IConstraint;
 import org.but4reuse.feature.constraints.IConstraintsDiscovery;
 import org.but4reuse.feature.constraints.activator.Activator;
@@ -57,11 +60,9 @@ public class BinaryRelationConstraintsDiscovery implements IConstraintsDiscovery
 				.getBoolean(BinaryRelationPreferencePage.REQUIRES);
 		if (requires) {
 			long start = System.currentTimeMillis();
-			for (int y = 0; y < n; y++) {
-				for (int x = 0; x < n; x++) {
-					if (x != y) {
-						Block b1 = adaptedModel.getOwnedBlocks().get(y);
-						Block b2 = adaptedModel.getOwnedBlocks().get(x);
+			for (Block b1 : adaptedModel.getOwnedBlocks()) {
+				for (Block b2 : adaptedModel.getOwnedBlocks()) {
+					if (b1 != b2) {
 						monitor.subTask("Checking Requires relations of " + b1.getName() + " with " + b2.getName());
 						// check monitor
 						if (monitor.isCanceled()) {
@@ -72,10 +73,7 @@ public class BinaryRelationConstraintsDiscovery implements IConstraintsDiscovery
 						// requires b1 -> b2
 						List<String> messages = blockRequiresAnotherBlockB(b1, b2);
 						if (messages.size() > 0) {
-							IConstraint constraint = new ConstraintImpl();
-							constraint.setType(IConstraint.REQUIRES);
-							constraint.setBlock1(b1);
-							constraint.setBlock2(b2);
+							Constraint constraint = new BasicRequiresConstraint(b1, b2);
 							constraint.setExplanations(messages);
 							constraint.setNumberOfReasons(messages.size());
 							constraintList.add(constraint);
@@ -92,14 +90,14 @@ public class BinaryRelationConstraintsDiscovery implements IConstraintsDiscovery
 		if (excludes) {
 			long start = System.currentTimeMillis();
 			for (int y = 0; y < n; y++) {
+				Block b1 = adaptedModel.getOwnedBlocks().get(y);
 				for (int x = 0; x < n; x++) {
 					// mutual exclusion, not(b1 and b2), as it is mutual we do
 					// not need to check the opposite
 					if (x != y && y < x) {
-						Block b1 = adaptedModel.getOwnedBlocks().get(y);
 						Block b2 = adaptedModel.getOwnedBlocks().get(x);
-						monitor.subTask("Checking Mutual Exclusion relations of " + b1.getName() + " with "
-								+ b2.getName());
+						monitor.subTask(
+								"Checking Mutual Exclusion relations of " + b1.getName() + " with " + b2.getName());
 						// check monitor
 						if (monitor.isCanceled()) {
 							return constraintList;
@@ -107,10 +105,7 @@ public class BinaryRelationConstraintsDiscovery implements IConstraintsDiscovery
 						// mutual exclusion
 						List<String> messages = blockExcludesAnotherBlock(b1, b2);
 						if (messages.size() > 0) {
-							IConstraint constraint = new ConstraintImpl();
-							constraint.setType(IConstraint.MUTUALLY_EXCLUDES);
-							constraint.setBlock1(b1);
-							constraint.setBlock2(b2);
+							Constraint constraint = new BasicExcludesConstraint(b1, b2);
 							constraint.setExplanations(messages);
 							constraint.setNumberOfReasons(messages.size());
 							constraintList.add(constraint);
@@ -120,8 +115,8 @@ public class BinaryRelationConstraintsDiscovery implements IConstraintsDiscovery
 					}
 				}
 			}
-			AdaptedModelManager.registerTime("Constraints discovery [Mutual exclusion]", System.currentTimeMillis()
-					- start);
+			AdaptedModelManager.registerTime("Constraints discovery [Mutual exclusion]",
+					System.currentTimeMillis() - start);
 		}
 		// monitor.done();
 		return constraintList;

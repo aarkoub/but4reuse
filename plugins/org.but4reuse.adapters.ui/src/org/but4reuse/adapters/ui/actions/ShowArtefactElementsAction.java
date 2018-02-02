@@ -12,6 +12,7 @@ import org.but4reuse.adapters.ui.AdaptersSelectionDialog;
 import org.but4reuse.artefactmodel.Artefact;
 import org.but4reuse.artefactmodel.ArtefactModel;
 import org.but4reuse.artefactmodel.ArtefactModelFactory;
+import org.but4reuse.utils.strings.StringUtils;
 import org.but4reuse.utils.ui.dialogs.ScrollableMessageDialog;
 import org.but4reuse.utils.workbench.WorkbenchUtils;
 import org.eclipse.core.resources.IResource;
@@ -96,8 +97,8 @@ public class ShowArtefactElementsAction implements IObjectActionDelegate, IViewA
 							// Create the text to be shown
 							StringBuilder sText = new StringBuilder();
 							for (String t : text) {
-								t = t.replaceAll("\n", " ").replaceAll("\r", "");
-								sText.append(t + "\n");
+								sText.append(StringUtils.removeNewLines(t));
+								sText.append("\n");
 							}
 							String name = artefact.getName();
 							if (name == null || name.length() == 0) {

@@ -57,7 +57,7 @@ public class ConstructSeparatelyViewAction implements IViewActionDelegate {
 			out = output.getFullPath().toString();
 		}
 		URISelectionDialog inputDialog = new URISelectionDialog(Display.getCurrent().getActiveShell(),
-				"Construction URI", "Insert Construction URI", "platform:/resource" + out + "/");
+				"Construction URI", "Insert Construction URI", "platform:/resource" + out + "/assets/");
 		if (inputDialog.open() != Dialog.OK) {
 			return;
 		}
@@ -86,8 +86,8 @@ public class ConstructSeparatelyViewAction implements IViewActionDelegate {
 					numberOfElements = 0;
 
 					try {
-						blockConstructionURI = new URI(constructionURI.toString()
-								+ block.getName().replaceAll(" ", "_") + "/");
+						blockConstructionURI = new URI(
+								constructionURI.toString() + block.getName().replaceAll(" ", "_") + "/");
 					} catch (URISyntaxException e1) {
 						e1.printStackTrace();
 					}
@@ -115,14 +115,14 @@ public class ConstructSeparatelyViewAction implements IViewActionDelegate {
 					}
 
 					// Launch Progress dialog
-					ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(Display.getCurrent()
-							.getActiveShell());
+					ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(
+							Display.getCurrent().getActiveShell());
 
 					try {
 						progressDialog.run(true, true, new IRunnableWithProgress() {
 							@Override
-							public void run(IProgressMonitor monitor) throws InvocationTargetException,
-									InterruptedException {
+							public void run(IProgressMonitor monitor)
+									throws InvocationTargetException, InterruptedException {
 
 								// Number of adapters + total numbers of
 								// elements

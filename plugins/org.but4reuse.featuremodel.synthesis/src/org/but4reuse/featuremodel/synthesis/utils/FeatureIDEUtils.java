@@ -7,23 +7,34 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.but4reuse.adaptedmodel.AdaptedModel;
+import org.but4reuse.feature.constraints.BasicExcludesConstraint;
+import org.but4reuse.feature.constraints.BasicRequiresConstraint;
 import org.but4reuse.feature.constraints.IConstraint;
+import org.but4reuse.featuremodel.synthesis.impl.FlatFMSynthesis;
 import org.but4reuse.utils.files.FileUtils;
+import org.but4reuse.utils.strings.StringUtils;
 import org.but4reuse.utils.workbench.WorkbenchUtils;
 import org.eclipse.core.resources.IFile;
 import org.prop4j.Node;
 import org.prop4j.NodeReader;
 
+import de.ovgu.featureide.fm.core.ConstraintAttribute;
+import de.ovgu.featureide.fm.core.FeatureModelAnalyzer;
 import de.ovgu.featureide.fm.core.base.IFeature;
+import de.ovgu.featureide.fm.core.base.IFeatureModel;
 import de.ovgu.featureide.fm.core.base.impl.Constraint;
 import de.ovgu.featureide.fm.core.base.impl.DefaultFeatureModelFactory;
 import de.ovgu.featureide.fm.core.base.impl.FMFormatManager;
 import de.ovgu.featureide.fm.core.base.impl.Feature;
 import de.ovgu.featureide.fm.core.base.impl.FeatureModel;
 import de.ovgu.featureide.fm.core.io.manager.FileHandler;
+import de.ovgu.featureide.fm.core.job.monitor.NullMonitor;
 
 /**
  * Feature IDE Utils
@@ -31,6 +42,12 @@ import de.ovgu.featureide.fm.core.io.manager.FileHandler;
  * @author jabier.martinez
  */
 public class FeatureIDEUtils {
+
+	public static IFeatureModel createFeatureModel(AdaptedModel adaptedModel) {
+		FlatFMSynthesis synthesisMethod = new FlatFMSynthesis();
+		IFeatureModel fm = synthesisMethod.doCreateFeatureModel(adaptedModel);
+		return fm;
+	}
 
 	public static void exportFeatureModel(URI featureModelURI, FeatureModel fm) {
 		File fmFile = FileUtils.getFile(featureModelURI);
@@ -87,16 +104,6 @@ public class FeatureIDEUtils {
 	 * @return
 	 */
 	public static String getConstraintString(IConstraint constraint) {
-		String type = constraint.getType();
-		// only this two supported for the moment
-		if (type.equals(IConstraint.REQUIRES) || type.equals(IConstraint.MUTUALLY_EXCLUDES)) {
-			String text = validFeatureName(constraint.getBlock1().getName()) + " implies ";
-			if (type.equals(IConstraint.MUTUALLY_EXCLUDES)) {
-				text += "not ";
-			}
-			text += validFeatureName(constraint.getBlock2().getName());
-			return text;
-		}
 		return constraint.getText();
 	}
 
@@ -106,7 +113,7 @@ public class FeatureIDEUtils {
 	 * @param featureModel
 	 * @param file
 	 */
-	public static void save(FeatureModel featureModel, File file) {
+	public static void save(IFeatureModel featureModel, File file) {
 		String string = FileHandler.saveToString(featureModel,
 				FMFormatManager.getInstance().getFormatByExtension("xml"));
 		try {
@@ -160,8 +167,7 @@ public class FeatureIDEUtils {
 	 * @return
 	 */
 	public static String validFeatureName(String name) {
-		// TODO improve checks
-		return name.replaceAll(" ", "_");
+		return StringUtils.validName(name);
 	}
 
 	// For example 3 requires 2 (3 is child of 2). Then 2 requires 1. isAncestor
@@ -182,13 +188,14 @@ public class FeatureIDEUtils {
 
 	public static boolean existsExcludeConstraint(List<IConstraint> constraints, IFeature f1, IFeature f2) {
 		for (IConstraint constraint : constraints) {
-			if (constraint.getType().equals(IConstraint.MUTUALLY_EXCLUDES)) {
+			if (constraint instanceof BasicExcludesConstraint) {
+				BasicExcludesConstraint c = (BasicExcludesConstraint)constraint;
 				// check f1 excludes f2 and viceversa
-				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock1().getName()))
-						&& f2.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock2().getName()))) {
+				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock1().getName()))
+						&& f2.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock2().getName()))) {
 					return true;
-				} else if (f2.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock1().getName()))
-						&& f1.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock2().getName()))) {
+				} else if (f2.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock1().getName()))
+						&& f1.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock2().getName()))) {
 					return true;
 				}
 			}
@@ -198,9 +205,10 @@ public class FeatureIDEUtils {
 
 	public static boolean existsRequiresConstraint(List<IConstraint> constraints, Feature f1, Feature f2) {
 		for (IConstraint constraint : constraints) {
-			if (constraint.getType().equals(IConstraint.REQUIRES)) {
-				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock1().getName()))
-						&& f2.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock2().getName()))) {
+			if (constraint instanceof BasicRequiresConstraint) {
+				BasicRequiresConstraint c = (BasicRequiresConstraint)constraint;
+				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock1().getName()))
+						&& f2.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock2().getName()))) {
 					return true;
 				}
 			}
@@ -212,9 +220,10 @@ public class FeatureIDEUtils {
 			IFeature f1) {
 		List<IFeature> required = new ArrayList<IFeature>();
 		for (IConstraint constraint : constraints) {
-			if (constraint.getType().equals(IConstraint.REQUIRES)) {
-				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock1().getName()))) {
-					required.add(fm.getFeature(FeatureIDEUtils.validFeatureName(constraint.getBlock2().getName())));
+			if (constraint instanceof BasicRequiresConstraint) {
+				BasicRequiresConstraint c = (BasicRequiresConstraint)constraint;
+				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock1().getName()))) {
+					required.add(fm.getFeature(FeatureIDEUtils.validFeatureName(c.getBlock2().getName())));
 				}
 			}
 		}
@@ -223,14 +232,38 @@ public class FeatureIDEUtils {
 
 	public static int getNumberOfReasonsOfRequiresConstraint(List<IConstraint> constraints, IFeature f1, IFeature f2) {
 		for (IConstraint constraint : constraints) {
-			if (constraint.getType().equals(IConstraint.REQUIRES)) {
-				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock1().getName()))
-						&& f2.getName().equals(FeatureIDEUtils.validFeatureName(constraint.getBlock2().getName()))) {
+			if (constraint instanceof BasicRequiresConstraint) {
+				BasicRequiresConstraint c = (BasicRequiresConstraint)constraint;
+				if (f1.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock1().getName()))
+						&& f2.getName().equals(FeatureIDEUtils.validFeatureName(c.getBlock2().getName()))) {
 					return constraint.getNumberOfReasons();
 				}
 			}
 		}
 		return -1;
+	}
+
+	/**
+	 * Remove redundant constraints
+	 * 
+	 * @param fm
+	 */
+	public static void removeRedundantConstraints(IFeatureModel fm) {
+		FeatureModelAnalyzer analyzer = fm.getAnalyser();
+		analyzer.calculateRedundantConstraints = true;
+		analyzer.calculateTautologyConstraints = false;
+		analyzer.calculateDeadConstraints = false;
+		analyzer.calculateFOConstraints = false;
+		HashMap<Object, Object> o = analyzer.analyzeFeatureModel(new NullMonitor());
+		for (Entry<Object, Object> entry : o.entrySet()) {
+			if (entry.getKey() instanceof Constraint) {
+				if (entry.getValue() instanceof ConstraintAttribute) {
+					if ((ConstraintAttribute) entry.getValue() == ConstraintAttribute.REDUNDANT) {
+						fm.removeConstraint((Constraint) entry.getKey());
+					}
+				}
+			}
+		}
 	}
 
 }

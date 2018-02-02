@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import de.ovgu.featureide.fm.core.base.FeatureUtils;
 import de.ovgu.featureide.fm.core.base.IFeature;
+import de.ovgu.featureide.fm.core.base.IFeatureModel;
 import de.ovgu.featureide.fm.core.base.impl.DefaultFeatureModelFactory;
 import de.ovgu.featureide.fm.core.base.impl.Feature;
 import de.ovgu.featureide.fm.core.base.impl.FeatureModel;
@@ -30,7 +31,35 @@ public class FlatFMSynthesis implements IFeatureModelSynthesis {
 
 	@Override
 	public void createFeatureModel(URI outputContainer, IProgressMonitor monitor) {
+		// Get current adaptedModel
 		AdaptedModel adaptedModel = AdaptedModelManager.getAdaptedModel();
+
+		// Synthesize fm
+		IFeatureModel fm = doCreateFeatureModel(adaptedModel);
+
+		// Remove redundant constraints
+		FeatureIDEUtils.removeRedundantConstraints(fm);
+
+		// Save
+		try {
+			URI fmURI = new URI(outputContainer + this.getClass().getSimpleName() + ".xml");
+			File fmFile = FileUtils.getFile(fmURI);
+			FileUtils.createFile(fmFile);
+			FeatureIDEUtils.save(fm, fmFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * Create a flat feature model with the constraints as cross-tree
+	 * constraints
+	 * 
+	 * @param adaptedModel
+	 * @return the feature model
+	 */
+	public FeatureModel doCreateFeatureModel(AdaptedModel adaptedModel) {
 		FeatureModel fm = new FeatureModel(DefaultFeatureModelFactory.ID);
 
 		String rootName = AdaptedModelHelper.getName(adaptedModel);
@@ -43,8 +72,8 @@ public class FlatFMSynthesis implements IFeatureModelSynthesis {
 		IFeature root = new Feature(fm, rootName);
 		FeatureUtils.setAnd(root, true);
 		FeatureUtils.setRoot(fm, root);
-
 		fm.addFeature(root);
+		fm.getStructure().setRoot(root.getStructure());
 
 		LinkedList<IFeature> children = new LinkedList<IFeature>();
 		// Add blocks as features
@@ -62,16 +91,7 @@ public class FlatFMSynthesis implements IFeatureModelSynthesis {
 		for (IConstraint constraint : ConstraintsHelper.getCalculatedConstraints(adaptedModel)) {
 			FeatureIDEUtils.addConstraint(fm, FeatureIDEUtils.getConstraintString(constraint));
 		}
-
-		// Save
-		try {
-			URI fmURI = new URI(outputContainer + this.getClass().getSimpleName() + ".xml");
-			File fmFile = FileUtils.getFile(fmURI);
-			FileUtils.createFile(fmFile);
-			FeatureIDEUtils.save(fm, fmFile);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		return fm;
 	}
 
 }

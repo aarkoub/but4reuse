@@ -93,4 +93,23 @@ public class StringUtils {
 		}
 		return list;
 	}
+
+	/**
+	 * Remove new lines
+	 * 
+	 * @param string
+	 * @return a single line
+	 */
+	public static String removeNewLines(String string) {
+		return string.replaceAll("\n", " ").replaceAll("\r", "");
+	}
+
+	/**
+	 * Transform to a identifier-like string (e.g., no whitespaces)
+	 * @param name
+	 * @return
+	 */
+	public static String validName(String name) {
+		return name.replaceAll(" ", "_");
+	}
 }

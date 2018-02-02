@@ -23,6 +23,7 @@ import org.but4reuse.adapters.helper.AdaptersHelper;
 import org.but4reuse.adapters.preferences.PreferencesHelper;
 import org.but4reuse.artefactmodel.Artefact;
 import org.but4reuse.artefactmodel.ArtefactModel;
+import org.but4reuse.utils.strings.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
@@ -232,7 +233,7 @@ public class AdaptedModelHelper {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Get the name of the artefact model
 	 * 
@@ -241,7 +242,7 @@ public class AdaptedModelHelper {
 	 */
 	public static String getName(AdaptedModel adaptedModel) {
 		ArtefactModel am = getArtefactModel(adaptedModel);
-		if(am.getName() != null && am.getName().length() > 0) {
+		if (am.getName() != null && am.getName().length() > 0) {
 			return am.getName();
 		}
 		return null;
@@ -342,6 +343,49 @@ public class AdaptedModelHelper {
 		return elements;
 	}
 
+	/**
+	 * Get the elements of a block in the version found in a given artefact
+	 * 
+	 * @param block
+	 * @param adaptedArtefact
+	 * @return list of elements (non null)
+	 */
+	public static List<IElement> getElementsOfBlockFromAdaptedArtefact(Block block, AdaptedArtefact adaptedArtefact) {
+		List<IElement> elements = new ArrayList<IElement>();
+		adaptedArtefact.getOwnedElementWrappers();
+		for (BlockElement be : block.getOwnedBlockElements()) {
+			for (ElementWrapper ew : be.getElementWrappers()) {
+				if (adaptedArtefact.getOwnedElementWrappers().contains(ew)) {
+					elements.add((IElement) ew.getElement());
+				}
+			}
+		}
+		return elements;
+	}
+
+	/**
+	 * Get the elements of a set of blocks in the version found in a given
+	 * artefact
+	 * 
+	 * @param blocks
+	 * @param adaptedArtefact
+	 * @return list of elements (non null)
+	 */
+	public static List<IElement> getElementsOfBlocksFromAdaptedArtefact(List<Block> blocks,
+			AdaptedArtefact adaptedArtefact) {
+		List<IElement> elements = new ArrayList<IElement>();
+		for (Block block : blocks) {
+			elements.addAll(getElementsOfBlockFromAdaptedArtefact(block, adaptedArtefact));
+		}
+		return elements;
+	}
+
+	/**
+	 * Get elements of adapted artefact
+	 * 
+	 * @param adaptedArtefact
+	 * @return list of elements
+	 */
 	public static List<IElement> getElementsOfAdaptedArtefact(AdaptedArtefact adaptedArtefact) {
 		List<IElement> elements = new ArrayList<IElement>();
 		for (ElementWrapper ew : adaptedArtefact.getOwnedElementWrappers()) {
@@ -407,15 +451,17 @@ public class AdaptedModelHelper {
 			Map<IElement, BlockElement> iebeMap) {
 		Set<IDependencyObject> result = new LinkedHashSet<IDependencyObject>();
 		BlockElement blockElement = iebeMap.get(element);
-		// Maybe only first...
-		for (ElementWrapper ew : blockElement.getElementWrappers()) {
-			IElement e = (IElement) ew.getElement();
-			Map<String, List<IDependencyObject>> dependants = e.getDependants();
-			// keep ordering
-			for (Entry<String, List<IDependencyObject>> entry : dependants.entrySet()) {
-				for (IDependencyObject ido : entry.getValue()) {
-					if (!result.contains(ido)) {
-						result.add(ido);
+		if (blockElement != null) {
+			// Maybe only first...
+			for (ElementWrapper ew : blockElement.getElementWrappers()) {
+				IElement e = (IElement) ew.getElement();
+				Map<String, List<IDependencyObject>> dependants = e.getDependants();
+				// keep ordering
+				for (Entry<String, List<IDependencyObject>> entry : dependants.entrySet()) {
+					for (IDependencyObject ido : entry.getValue()) {
+						if (!result.contains(ido)) {
+							result.add(ido);
+						}
 					}
 				}
 			}
@@ -491,6 +537,22 @@ public class AdaptedModelHelper {
 	public static Block getBlockByName(AdaptedModel adaptedModel, String blockName) {
 		for (Block block : adaptedModel.getOwnedBlocks()) {
 			if (block.getName().equals(blockName)) {
+				return block;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Get block by valid name
+	 * 
+	 * @param adaptedModel
+	 * @param blockName
+	 * @return the block or null if not found
+	 */
+	public static Block getBlockByValidName(AdaptedModel adaptedModel, String blockValidName) {
+		for (Block block : adaptedModel.getOwnedBlocks()) {
+			if (StringUtils.validName(block.getName()).equals(blockValidName)) {
 				return block;
 			}
 		}
