@@ -47,4 +47,40 @@ public class DependenciesBuilder {
 			}
 		}
 	}
+	
+	
+	
+	
+	//ADD PSTL
+	public static void buildImportExport(PluginElement plugin, List<IElement> pluginsSet) {
+
+		// Import packages
+		for (String dependency_symbName : plugin.getImport_packages()) {
+			for (IElement elem : pluginsSet) {
+				if (elem instanceof PluginElement) {
+					PluginElement pe = (PluginElement) elem;
+					if (pe.getSymbName().equalsIgnoreCase(dependency_symbName)) {
+						// TODO check versions
+						plugin.addDependency("ImportPackage", pe);
+						break;
+					}
+				}
+			}
+		}
+		
+		
+		// Export packages
+				for (String dependency_symbName : plugin.getExport_packages()) {
+					for (IElement elem : pluginsSet) {
+						if (elem instanceof PluginElement) {
+							PluginElement pe = (PluginElement) elem;
+							if (pe.getSymbName().equalsIgnoreCase(dependency_symbName)) {
+								// TODO check versions
+								plugin.addDependency("ExportPackage", pe);
+								break;
+							}
+						}
+					}
+				}
+	}
 }

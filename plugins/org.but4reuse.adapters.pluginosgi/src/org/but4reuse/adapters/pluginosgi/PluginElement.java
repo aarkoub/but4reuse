@@ -24,7 +24,22 @@ public class PluginElement extends FileElement {
 	// because we do not know the dependencies
 	// The same thing for absoluthPath
 	private ArrayList<String> require_Bundles;
-
+	
+	
+	//PSTL ADD
+	private ArrayList<String> import_packages;
+	private ArrayList<String> export_packages;
+	
+	public ArrayList<String> getImport_packages(){
+		return import_packages;
+	}
+	
+	public ArrayList<String> getExport_packages(){
+		return export_packages;
+	}
+	
+	
+	
 	@Override
 	public double similarity(IElement anotherElement) {
 		// When they have the same relative URI
@@ -50,6 +65,8 @@ public class PluginElement extends FileElement {
 
 	public PluginElement() {
 		require_Bundles = new ArrayList<String>();
+		import_packages = new ArrayList<String>();;
+		export_packages = new ArrayList<String>();
 	}
 
 	public String getSymbName() {

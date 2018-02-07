@@ -33,6 +33,14 @@ public class PluginInfosExtractor {
 
 	private static String currentLocalization = null;
 
+	
+	//ADD PSTL
+	private static final String IMPORT_PACKAGE = "Import-Package";
+	private static final String EXPORT_PACKAGE = "Export-Package";
+	
+	
+	
+	
 	private static void fillPluginElementInfo(PluginElement plugin, Manifest manifest) {
 		Attributes attributes = manifest.getMainAttributes();
 		String value = attributes.getValue(BUNDLE_SYMBOLIC_NAME);
@@ -56,7 +64,33 @@ public class PluginInfosExtractor {
 		if (value != null) {
 			getRequireBundlesSymbNames(value, plugin);
 		}
-
+		
+		
+		//ADD PSTL
+		//Import and export packages
+		
+		String import_package = attributes.getValue(IMPORT_PACKAGE);
+		if(import_package != null){
+			String[] package_names;
+			List<String> limport = plugin.getImport_packages();
+			package_names = import_package.split(",");
+			for(String names: package_names){
+				limport.add(names);
+			}
+		}
+		
+		
+		String export_package = attributes.getValue(EXPORT_PACKAGE);
+		if(export_package != null){
+			String[] package_names;
+			List<String> lexport = plugin.getExport_packages();
+			package_names = export_package.split(",");
+			for(String names: package_names){
+				lexport.add(names);
+			}
+		}
+		
+		
 		// Name
 		currentLocalization = attributes.getValue(BUNDLE_LOCALIZATION);
 		if (currentLocalization == null) {
