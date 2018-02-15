@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.but4reuse.adapters.IAdapter;
 import org.but4reuse.adapters.IElement;
+import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.ActivatorServiceBundleExtractor;
 import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.DependenciesBuilder;
 import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.PluginInfosExtractor;
 import org.but4reuse.utils.files.FileUtils;
@@ -25,7 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * @author Jason CHUMMUN
  * 
  */
-public class EclipseAdapter implements IAdapter {
+public class PluginOsgiAdapter implements IAdapter {
 
 	private URI rootURI;
 
@@ -62,6 +63,8 @@ public class EclipseAdapter implements IAdapter {
 		// A hashmap of bundle symbolic names and the complete line in the
 		// bundles.info file
 		bundlesInfoLines = PluginInfosExtractor.createBundlesInfoMap(uri);
+		
+		ActivatorServiceBundleExtractor activator = new ActivatorServiceBundleExtractor(uri);
 
 		// start the containment tree traversal, with null as initial container
 		adapt(file, elements, null);
