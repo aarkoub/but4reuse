@@ -37,7 +37,7 @@ public class PluginInfosExtractor {
 	//ADD PSTL
 	private static final String IMPORT_PACKAGE = "Import-Package";
 	private static final String EXPORT_PACKAGE = "Export-Package";
-	
+	private static final String SERVICE_COMPONENT=  "Service-Component";
 	
 	
 	
@@ -79,7 +79,7 @@ public class PluginInfosExtractor {
 			}
 		}
 		
-		
+	
 		String export_package = attributes.getValue(EXPORT_PACKAGE);
 		if(export_package != null){
 			String[] package_names;
@@ -87,6 +87,16 @@ public class PluginInfosExtractor {
 			package_names = export_package.split(",");
 			for(String names: package_names){
 				lexport.add(names);
+			}
+		}
+		
+		String service_component = attributes.getValue(SERVICE_COMPONENT);
+		if(service_component != null){
+			String[] uri_xml ;
+			List<String> lservice_components = plugin.getService_Components();
+			uri_xml = service_component.split(",");
+			for(String uri : uri_xml){
+				lservice_components.add(uri);
 			}
 		}
 		

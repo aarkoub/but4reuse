@@ -29,6 +29,7 @@ public class PluginElement extends FileElement {
 	//PSTL ADD
 	private ArrayList<String> import_packages;
 	private ArrayList<String> export_packages;
+	private ArrayList<String> service_components;
 	
 	public ArrayList<String> getImport_packages(){
 		return import_packages;
@@ -37,6 +38,12 @@ public class PluginElement extends FileElement {
 	public ArrayList<String> getExport_packages(){
 		return export_packages;
 	}
+	
+	public ArrayList<String> getService_Components(){
+		return service_components;
+	}
+	
+	
 	
 	
 	
