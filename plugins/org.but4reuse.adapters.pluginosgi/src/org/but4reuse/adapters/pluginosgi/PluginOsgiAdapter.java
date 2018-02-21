@@ -64,7 +64,6 @@ public class PluginOsgiAdapter implements IAdapter {
 		// bundles.info file
 		bundlesInfoLines = PluginInfosExtractor.createBundlesInfoMap(uri);
 		
-		ActivatorServiceBundleExtractor activator = new ActivatorServiceBundleExtractor(uri);
 
 		// start the containment tree traversal, with null as initial container
 		adapt(file, elements, null);
@@ -75,6 +74,7 @@ public class PluginOsgiAdapter implements IAdapter {
 				PluginElement pe = (PluginElement) elem;
 				DependenciesBuilder.build(pe, elements);
 				DependenciesBuilder.buildImportExport(pe, elements);
+				//ActivatorServiceBundleExtractor.analyzeServicePlugin(pe);
 			}
 		}
 
@@ -97,6 +97,8 @@ public class PluginOsgiAdapter implements IAdapter {
 				if (file.isDirectory()) {
 					newElement = PluginInfosExtractor.getPluginInfosFromManifest(file.getAbsolutePath()
 							+ "/META-INF/MANIFEST.MF");
+					//System.out.println("PATH "+file.getAbsolutePath());
+					newElement.setUri(file.toURI());
 				} else {
 					// Jar plugin
 					newElement = PluginInfosExtractor.getPluginInfosFromJar(file.getAbsolutePath());

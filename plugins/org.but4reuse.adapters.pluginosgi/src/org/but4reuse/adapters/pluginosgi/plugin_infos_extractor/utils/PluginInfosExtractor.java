@@ -96,7 +96,7 @@ public class PluginInfosExtractor {
 			List<String> lservice_components = plugin.getService_Components();
 			uri_xml = service_component.split(",");
 			for(String uri : uri_xml){
-				lservice_components.add(uri);
+				//lservice_components.add(uri);
 			}
 		}
 		

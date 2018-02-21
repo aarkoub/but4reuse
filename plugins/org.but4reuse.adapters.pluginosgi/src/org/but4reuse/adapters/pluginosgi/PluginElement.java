@@ -1,7 +1,9 @@
 package org.but4reuse.adapters.pluginosgi;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.but4reuse.adapters.IElement;
 import org.but4reuse.utils.strings.StringUtils;
@@ -30,6 +32,12 @@ public class PluginElement extends FileElement {
 	private ArrayList<String> import_packages;
 	private ArrayList<String> export_packages;
 	private ArrayList<String> service_components;
+	private Map<String,String> services;
+	
+	
+	public Map<String,String> getServices(){
+		return services;
+	}
 	
 	public ArrayList<String> getImport_packages(){
 		return import_packages;
@@ -74,6 +82,8 @@ public class PluginElement extends FileElement {
 		require_Bundles = new ArrayList<String>();
 		import_packages = new ArrayList<String>();;
 		export_packages = new ArrayList<String>();
+		service_components = new ArrayList<String>();
+		services = new HashMap<String, String>();
 	}
 
 	public String getSymbName() {
