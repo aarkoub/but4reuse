@@ -2,16 +2,13 @@ package org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.but4reuse.adapters.pluginosgi.PluginElement;
-import org.but4reuse.utils.files.FileUtils;
 
 public class ActivatorServiceBundleExtractor {
 	

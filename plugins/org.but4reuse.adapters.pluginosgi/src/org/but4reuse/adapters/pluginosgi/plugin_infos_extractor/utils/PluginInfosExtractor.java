@@ -1,8 +1,10 @@
 package org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -93,10 +95,13 @@ public class PluginInfosExtractor {
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		if(service_component != null){
 			String[] uri_xml ;
+			String interfaceName;
 			List<String> lservice_components = plugin.getService_Components();
 			uri_xml = service_component.split(",");
 			for(String uri : uri_xml){
-				//lservice_components.add(uri);
+				interfaceName = parseDS(uri);
+				System.out.println(interfaceName);
+				lservice_components.add(interfaceName);
 			}
 		}
 		
@@ -253,4 +258,50 @@ public class PluginInfosExtractor {
 		}
 		return false;
 	}
+	
+	private static String parseDS(String uri){
+		
+		File file = new File(uri);
+		BufferedReader br = null;
+		String line = null;
+		String interfaceName = null;
+		
+		try {
+			FileReader fr = new FileReader(file);
+			br = new BufferedReader(fr);
+			while( (line = br.readLine())!=null){
+				if(line.contains("<provide") && line.contains("interface")){
+					break;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if(line!=null){
+			String [] words = line.split("  || =");
+			int i;
+			for(i=0; i<words.length; i++){
+				if(words[i].contains("interface")){
+					i++;
+				}
+			}
+			
+			words = words[i].split(".");
+			interfaceName = words[words.length-1];
+			
+		}
+		
+		return interfaceName;
+		
+	}
+	
+	
 }
