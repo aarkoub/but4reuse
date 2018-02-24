@@ -95,7 +95,7 @@ public class PluginInfosExtractor {
 			}
 		}
 		
-		boolean deleteDirectory = false;
+		/*boolean deleteDirectory = false;
 		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		if(service_component != null){
@@ -123,7 +123,7 @@ public class PluginInfosExtractor {
 				ZipExtractor.deleteDirectory(new File(PATH));
 			}
 			
-		}
+		}*/
 		
 		
 		// Name

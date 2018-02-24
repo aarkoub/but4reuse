@@ -140,8 +140,9 @@ public class ActivatorServiceBundleExtractor {
 	public static String getService(String line, File file) {
 		
 		BufferedReader br = null;
+		System.out.println(line);
 		String tofilter = extractBetween(line, ',', ',');
-		
+		System.out.println(line);
 		if(tofilter == "") return "";
 		
 		if(tofilter.contains("new ")) {
@@ -160,8 +161,8 @@ public class ActivatorServiceBundleExtractor {
 				FileReader fr = new FileReader(file);
 				br = new BufferedReader(fr);
 				while( (s = br.readLine())!=null){
-					if(s.contains(tofilter) && s.contains("new ") && s.contains("=")){
-						return s.substring(s.indexOf("new ")+4, s.indexOf("("));
+					if(s.contains(tofilter) && s.contains("new ") && s.contains("=") && s.contains("(")){
+						return (s.indexOf("new ")+4<s.indexOf("("))?s.substring(s.indexOf("new ")+4, s.indexOf("(")):"";
 					}
 					if(s.contains(tofilter) && s.contains("(") && s.contains(")") && s.contains("=")) {
 						return s.substring(s.indexOf("(")+1,s.indexOf(")"));
