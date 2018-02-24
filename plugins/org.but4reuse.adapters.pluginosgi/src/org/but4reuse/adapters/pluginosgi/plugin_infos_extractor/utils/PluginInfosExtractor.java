@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,8 @@ public class PluginInfosExtractor {
 	private static final String IMPORT_PACKAGE = "Import-Package";
 	private static final String EXPORT_PACKAGE = "Export-Package";
 	private static final String SERVICE_COMPONENT=  "Service-Component";
+	
+	private static String PATH = null;
 	
 	
 	
@@ -95,14 +98,13 @@ public class PluginInfosExtractor {
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		if(service_component != null){
 			String[] uri_xml ;
-			String interfaceName;
 			List<String> lservice_components = plugin.getService_Components();
-			uri_xml = service_component.split(",");
+			uri_xml = service_component.split(",|\\ ");
+			PATH = plugin.getAbsolutePath();
 			for(String uri : uri_xml){
-				interfaceName = parseDS(uri);
-				System.out.println(interfaceName);
-				lservice_components.add(interfaceName);
+				lservice_components.addAll(parserDS(uri));
 			}
+			for(String name : lservice_components) System.out.println(name);
 		}
 		
 		
@@ -259,19 +261,65 @@ public class PluginInfosExtractor {
 		return false;
 	}
 	
-	private static String parseDS(String uri){
+	
+	private static List<String> parserDS(String uri){
 		
-		File file = new File(uri);
+		List<String> interfaceNames = new ArrayList<String>();
+		
+		if(uri.charAt(0)!='/')
+			uri = '/'+uri;
+		
+		if(uri.contains("*.xml")){	
+			String newPath = PATH+uri.split("\\*.xml")[0];
+			File file = new File(newPath);
+
+			String[] list = file.list();
+			
+			for(int i=0; i<list.length; i++){
+				if(list[i].contains(".xml")){
+					interfaceNames.addAll(parseDS(newPath+list[i]));
+				}
+			}
+			
+		}
+		else{
+			interfaceNames.addAll(parseDS(PATH+uri));
+		}
+		
+		
+		return interfaceNames;
+	}
+	
+	private static List<String> parseDS(String path){
+
+		File file = new File(path);
 		BufferedReader br = null;
 		String line = null;
-		String interfaceName = null;
+		String interName = null;
+		List<String> interfaceNames = new ArrayList<>();
 		
 		try {
 			FileReader fr = new FileReader(file);
 			br = new BufferedReader(fr);
 			while( (line = br.readLine())!=null){
 				if(line.contains("<provide") && line.contains("interface")){
-					break;
+					
+					if(line!=null){
+						String [] words = line.split("=|>|/");
+						int i;
+						for(i=0; i<words.length; i++){
+							if(words[i].contains("interface")){
+								i++;
+								break;
+							}
+						}
+						
+						words = words[i].split("\\.");
+
+						interName = words[words.length-1];
+						
+						interfaceNames.add(interName.split("\"")[0]);
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -284,22 +332,9 @@ public class PluginInfosExtractor {
 				e.printStackTrace();
 			}
 		}
+
 		
-		if(line!=null){
-			String [] words = line.split("  || =");
-			int i;
-			for(i=0; i<words.length; i++){
-				if(words[i].contains("interface")){
-					i++;
-				}
-			}
-			
-			words = words[i].split(".");
-			interfaceName = words[words.length-1];
-			
-		}
-		
-		return interfaceName;
+		return interfaceNames;
 		
 	}
 	
