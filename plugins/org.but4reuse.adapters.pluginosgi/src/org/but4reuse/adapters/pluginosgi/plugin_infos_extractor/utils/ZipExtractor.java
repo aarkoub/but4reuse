@@ -83,14 +83,16 @@ public class ZipExtractor {
 	}
 	
 	public static void deleteDirectory(File file){
-		if(file.isDirectory()){
-			String[]entries = file.list();
-			for(String s: entries){
-			    File currentFile = new File(file.getPath(),s);
-			    currentFile.delete();
+		if(file != null){
+			if(file.isDirectory()){
+				for(File subfile: file.listFiles()){
+					deleteDirectory(subfile);
+				}
 			}
 			file.delete();
 		}
+		
 	}
+	
 	
 }

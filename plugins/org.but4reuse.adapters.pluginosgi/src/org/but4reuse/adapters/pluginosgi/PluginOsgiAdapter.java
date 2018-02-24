@@ -74,7 +74,7 @@ public class PluginOsgiAdapter implements IAdapter {
 				PluginElement pe = (PluginElement) elem;
 				DependenciesBuilder.build(pe, elements);
 				DependenciesBuilder.buildImportExport(pe, elements);
-				//ActivatorServiceBundleExtractor.analyzeServicePlugin(pe);
+				ActivatorServiceBundleExtractor.analyzeServicePlugin(pe);
 			}
 		}
 
