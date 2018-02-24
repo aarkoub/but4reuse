@@ -95,16 +95,34 @@ public class PluginInfosExtractor {
 			}
 		}
 		
+		boolean deleteDirectory = false;
+		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		if(service_component != null){
 			String[] uri_xml ;
 			List<String> lservice_components = plugin.getService_Components();
-			uri_xml = service_component.split(",|\\ ");
+			uri_xml = service_component.split(",\\s+|,");
 			PATH = plugin.getAbsolutePath();
+			if(PATH.endsWith(".jar")){
+				try {
+					ZipExtractor.unZipAll(new File(PATH), new File(PATH.substring(0, PATH.length()-4)));
+					PATH = PATH.substring(0, PATH.length()-4);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				deleteDirectory = true;
+			}
 			for(String uri : uri_xml){
+				System.out.println(uri);
 				lservice_components.addAll(parserDS(uri));
 			}
 			for(String name : lservice_components) System.out.println(name);
+			
+			if(deleteDirectory){
+				ZipExtractor.deleteDirectory(new File(PATH));
+			}
+			
 		}
 		
 		
@@ -276,7 +294,7 @@ public class PluginInfosExtractor {
 			String[] list = file.list();
 			
 			for(int i=0; i<list.length; i++){
-				if(list[i].contains(".xml")){
+				if(list[i].endsWith(".xml")){
 					interfaceNames.addAll(parseDS(newPath+list[i]));
 				}
 			}
@@ -295,7 +313,6 @@ public class PluginInfosExtractor {
 		File file = new File(path);
 		BufferedReader br = null;
 		String line = null;
-		String interName = null;
 		List<String> interfaceNames = new ArrayList<>();
 		
 		try {
@@ -313,12 +330,8 @@ public class PluginInfosExtractor {
 								break;
 							}
 						}
-						
-						words = words[i].split("\\.");
-
-						interName = words[words.length-1];
-						
-						interfaceNames.add(interName.split("\"")[0]);
+										
+						interfaceNames.add(words[i].split("\"")[1]);
 					}
 				}
 			}
