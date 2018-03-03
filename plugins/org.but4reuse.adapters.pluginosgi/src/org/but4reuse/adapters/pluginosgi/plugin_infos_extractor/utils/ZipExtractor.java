@@ -87,10 +87,10 @@ public class ZipExtractor {
 			String[]entries = file.list();
 			for(String s: entries){
 			    File currentFile = new File(file.getPath(),s);
-			    currentFile.delete();
+			    deleteDirectory(currentFile);
 			}
-			file.delete();
 		}
+		file.delete();
 	}
 	
 }

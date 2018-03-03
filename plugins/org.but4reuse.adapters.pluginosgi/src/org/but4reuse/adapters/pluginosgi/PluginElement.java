@@ -29,9 +29,8 @@ public class PluginElement extends FileElement {
 	
 	
 	//PSTL ADD
-	private ArrayList<String> import_packages;
-	private ArrayList<String> export_packages;
-	private ArrayList<String> service_components;
+	private ArrayList<PackageElement> import_packages;
+	private ArrayList<PackageElement> export_packages;
 	private Map<String,String> services;
 	
 	
@@ -39,18 +38,13 @@ public class PluginElement extends FileElement {
 		return services;
 	}
 	
-	public ArrayList<String> getImport_packages(){
+	public ArrayList<PackageElement> getImport_packages(){
 		return import_packages;
 	}
 	
-	public ArrayList<String> getExport_packages(){
+	public ArrayList<PackageElement> getExport_packages(){
 		return export_packages;
 	}
-	
-	public ArrayList<String> getService_Components(){
-		return service_components;
-	}
-	
 	
 	
 	
@@ -80,9 +74,8 @@ public class PluginElement extends FileElement {
 
 	public PluginElement() {
 		require_Bundles = new ArrayList<String>();
-		import_packages = new ArrayList<String>();;
-		export_packages = new ArrayList<String>();
-		service_components = new ArrayList<String>();
+		import_packages = new ArrayList<PackageElement>();
+		export_packages = new ArrayList<PackageElement>();
 		services = new HashMap<String, String>();
 	}
 

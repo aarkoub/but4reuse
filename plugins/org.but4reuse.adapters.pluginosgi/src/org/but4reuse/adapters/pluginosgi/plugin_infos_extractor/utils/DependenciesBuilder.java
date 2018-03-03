@@ -3,6 +3,7 @@ package org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils;
 import java.util.List;
 
 import org.but4reuse.adapters.IElement;
+import org.but4reuse.adapters.pluginosgi.PackageElement;
 import org.but4reuse.adapters.pluginosgi.PluginElement;
 
 /**
@@ -55,11 +56,11 @@ public class DependenciesBuilder {
 	public static void buildImportExport(PluginElement plugin, List<IElement> pluginsSet) {
 
 		// Import packages
-		for (String dependency_symbName : plugin.getImport_packages()) {
+		for (PackageElement dependency_symbName : plugin.getImport_packages()) {
 			for (IElement elem : pluginsSet) {
 				if (elem instanceof PluginElement) {
 					PluginElement pe = (PluginElement) elem;
-					if (pe.getSymbName().equalsIgnoreCase(dependency_symbName)) {
+					if (pe.getSymbName().equalsIgnoreCase(dependency_symbName.getName())) {
 						// TODO check versions
 						plugin.addDependency("ImportPackage", pe);
 						break;
@@ -70,11 +71,11 @@ public class DependenciesBuilder {
 		
 		
 		// Export packages
-				for (String dependency_symbName : plugin.getExport_packages()) {
+				for (PackageElement dependency_symbName : plugin.getExport_packages()) {
 					for (IElement elem : pluginsSet) {
 						if (elem instanceof PluginElement) {
 							PluginElement pe = (PluginElement) elem;
-							if (pe.getSymbName().equalsIgnoreCase(dependency_symbName)) {
+							if (pe.getSymbName().equalsIgnoreCase(dependency_symbName.getName())) {
 								// TODO check versions
 								plugin.addDependency("ExportPackage", pe);
 								break;

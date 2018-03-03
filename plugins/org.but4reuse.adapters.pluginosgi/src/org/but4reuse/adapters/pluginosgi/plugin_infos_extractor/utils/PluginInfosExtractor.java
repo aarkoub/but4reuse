@@ -1,10 +1,8 @@
 package org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -18,7 +16,9 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
+import org.but4reuse.adapters.pluginosgi.PackageElement;
 import org.but4reuse.adapters.pluginosgi.PluginElement;
+import org.but4reuse.adapters.pluginosgi.ServiceElement;
 import org.but4reuse.utils.files.FileUtils;
 
 public class PluginInfosExtractor {
@@ -75,12 +75,20 @@ public class PluginInfosExtractor {
 		//Import and export packages
 		
 		String import_package = attributes.getValue(IMPORT_PACKAGE);
+		
 		if(import_package != null){
 			String[] package_names;
-			List<String> limport = plugin.getImport_packages();
-			package_names = import_package.split(",");
-			for(String names: package_names){
-				limport.add(names);
+			List<PackageElement> limport = plugin.getImport_packages();
+			package_names = import_package.split(",\\s+|,");
+			for(String name: package_names){
+				
+				String p = name.split("\"|;")[0];
+				
+				if(p.contains(")"))
+					continue;
+				
+				limport.add(new PackageElement(p));
+								
 			}
 		}
 		
@@ -88,10 +96,18 @@ public class PluginInfosExtractor {
 		String export_package = attributes.getValue(EXPORT_PACKAGE);
 		if(export_package != null){
 			String[] package_names;
-			List<String> lexport = plugin.getExport_packages();
-			package_names = export_package.split(",");
-			for(String names: package_names){
-				lexport.add(names);
+			List<PackageElement> lexport = plugin.getExport_packages();
+			package_names = export_package.split(",\\s+|,");
+			for(String name: package_names){
+				
+				String p = name.split("\"|;")[0];
+				
+				if(p.contains(")") || p.contains("META-INF"))
+					continue;
+				
+				lexport.add(new PackageElement(p));
+
+				
 			}
 		}
 		
@@ -100,7 +116,7 @@ public class PluginInfosExtractor {
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		if(service_component != null){
 			String[] uri_xml ;
-			List<String> lservice_components = plugin.getService_Components();
+			List<PackageElement> lexport_packages = plugin.getExport_packages();
 			uri_xml = service_component.split(",\\s+|,");
 			PATH = plugin.getAbsolutePath();
 			if(PATH.endsWith(".jar")){
@@ -113,11 +129,42 @@ public class PluginInfosExtractor {
 				}
 				deleteDirectory = true;
 			}
+			
+			PackageElement p=null ;
+			
 			for(String uri : uri_xml){
-				System.out.println(uri);
-				lservice_components.addAll(parserDS(uri));
+				//System.out.println(uri);
+				
+				List<List<String>> infos = parserDS(uri);
+				String implClass = null;
+				
+				List<String> implClassList = infos.get(0);
+				if(!implClassList.isEmpty())
+					implClass = implClassList.get(0);
+				
+				//System.out.println("Implem : "+implClass);
+					
+				List<String> interfaceNames = infos.get(1);
+				
+				for(String n : interfaceNames ) {
+					String[] words = n.split("\\.");
+					
+					String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+
+					//System.out.println("Interface name "+n);
+					
+					if((p=findPackage(packageName, lexport_packages))==null){
+						//System.out.println("Package name "+packageName);
+						
+						p = new PackageElement(packageName);
+						lexport_packages.add(p);
+					}
+					p.addService(new ServiceElement(n, implClass));
+				}
+
 			}
-			for(String name : lservice_components) System.out.println(name);
+			
+			//for(ServiceElement serv : p.getServices()) System.out.println(serv.getInterfaceName());
 			
 			if(deleteDirectory){
 				ZipExtractor.deleteDirectory(new File(PATH));
@@ -280,7 +327,9 @@ public class PluginInfosExtractor {
 	}
 	
 	
-	private static List<String> parserDS(String uri){
+	private static List<List<String>> parserDS(String uri){
+		
+		List<List<String>> infos = new ArrayList<>();
 		
 		List<String> interfaceNames = new ArrayList<String>();
 		
@@ -295,60 +344,27 @@ public class PluginInfosExtractor {
 			
 			for(int i=0; i<list.length; i++){
 				if(list[i].endsWith(".xml")){
-					interfaceNames.addAll(parseDS(newPath+list[i]));
+					infos.addAll(XMLParser.getInformations(newPath+list[i]));
 				}
 			}
 			
 		}
 		else{
-			interfaceNames.addAll(parseDS(PATH+uri));
+		
+			infos.addAll(XMLParser.getInformations(PATH+uri));
 		}
 		
 		
-		return interfaceNames;
+		return infos;
 	}
-	
-	private static List<String> parseDS(String path){
 
-		File file = new File(path);
-		BufferedReader br = null;
-		String line = null;
-		List<String> interfaceNames = new ArrayList<>();
-		
-		try {
-			FileReader fr = new FileReader(file);
-			br = new BufferedReader(fr);
-			while( (line = br.readLine())!=null){
-				if(line.contains("<provide") && line.contains("interface")){
-					
-					if(line!=null){
-						String [] words = line.split("=|>|/");
-						int i;
-						for(i=0; i<words.length; i++){
-							if(words[i].contains("interface")){
-								i++;
-								break;
-							}
-						}
-										
-						interfaceNames.add(words[i].split("\"")[1]);
-					}
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}finally {
-			try {
-				br.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	private static PackageElement findPackage(String name, List<PackageElement> packages){
+		for(PackageElement p : packages){
+			if(name.contains(p.getName())){
+				return p;
 			}
 		}
-
-		
-		return interfaceNames;
-		
+		return null;
 	}
 	
 	
