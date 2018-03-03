@@ -83,14 +83,27 @@ public class ZipExtractor {
 	}
 	
 	public static void deleteDirectory(File file){
+<<<<<<< HEAD
 		if(file.isDirectory()){
 			String[]entries = file.list();
 			for(String s: entries){
 			    File currentFile = new File(file.getPath(),s);
 			    deleteDirectory(currentFile);
+=======
+		if(file != null){
+			if(file.isDirectory()){
+				for(File subfile: file.listFiles()){
+					deleteDirectory(subfile);
+				}
+>>>>>>> branch 'master' of https://github.com/aarkoub/but4reuse
 			}
 		}
+<<<<<<< HEAD
 		file.delete();
+=======
+		
+>>>>>>> branch 'master' of https://github.com/aarkoub/but4reuse
 	}
+	
 	
 }
