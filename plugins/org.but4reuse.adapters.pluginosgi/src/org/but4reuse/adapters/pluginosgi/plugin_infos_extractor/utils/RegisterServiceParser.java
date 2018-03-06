@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 public class RegisterServiceParser {
 	
@@ -25,6 +27,8 @@ public class RegisterServiceParser {
 	
 	public static void parse(String filepath){
 		char[] source = convertFileIntoCharArray(filepath);
+		
+		
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
 	    parser.setSource(source);
@@ -32,27 +36,30 @@ public class RegisterServiceParser {
 	    CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 	    cu.accept(new ASTVisitor() {
 	        
-	    	
-	    	public boolean visit(MethodDeclaration node){
-	    		//System.out.println(node.getName());
-	    		return true;
-	    	}
-	    	
+	  
 	    	
 	        @SuppressWarnings("unchecked")
 			public boolean visit(MethodInvocation node) {
 	        	if(!node.getName().toString().equals("registerService")){
 	        		return true;
 	        	}
-	        	System.out.print("Method: "+node.getName());
+	        	System.out.print("Method:"+node.getName()+"\t");
 	        	List<Object> args = node.arguments();
 	        	if(!args.isEmpty()){
-	        		for(Object arg: args){
+	        		for(Object arg: args.subList(0, 2)){
 	        			if(arg instanceof SimpleName){
-	        				System.out.print(((SimpleName)arg).getFullyQualifiedName()+" ");
+	        				System.out.print(((SimpleName)arg).getFullyQualifiedName()+"\t");
 	        			} else if(arg instanceof QualifiedName){
-	        				System.out.print(((QualifiedName)arg).getFullyQualifiedName()+" ");
+	        				System.out.print(((QualifiedName)arg).getFullyQualifiedName()+"\t");
+	        			} else if(arg instanceof MethodInvocation){
+	        				//if this is a instance call to getClass()
+	        				String itf = ((MethodInvocation)arg).toString();
+	        				itf = itf.substring(0,itf.indexOf('.'));
+	        				System.out.print(itf+"\t");
+	        			}else{
+	        				System.out.print("N/A:"+arg.getClass()+"\t");
 	        			}
+	        			
 	        		}
 	        	}
 	        	
@@ -63,9 +70,15 @@ public class RegisterServiceParser {
 
 	        
 	        public boolean visit(SingleVariableDeclaration node){
-	        	System.out.println("Type: "+node.getType()+" name: "+node.getName());
+	        	System.out.println("Type:"+node.getType()+"\tname:"+node.getName());
 	        	return true;
 	        }
+	        
+	        public boolean visit(VariableDeclarationStatement node){
+	        	System.out.println(node.toString());
+	        	return true;
+	        }
+	        
 	    });
 	}
 	
