@@ -18,3 +18,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.but4reuse.adapters.pluginosgi,
  org.but4reuse.adapters.pluginosgi.benchmark
 Bundle-Vendor: BUT4Reuse
+Import-Package: org.eclipse.jdt.core.dom
