@@ -5,82 +5,105 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.but4reuse.adapters.pluginosgi.ServiceElement;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 public class RegisterServiceParser {
 	
 	public static void main(String[] args){
-		parse("C:\\Users\\L-C\\Desktop\\Activator.java");
+		//parse("C:\\Users\\L-C\\Desktop\\Activator.java", new HashMap<String, VariableDeclarationFragment>(), new ArrayList<MethodInvocation>());
+		computeServiceElement("C:\\Users\\L-C\\Desktop\\Activator.java");
 	}
 	
-	public static void parse(String filepath){
+	
+	
+	
+	public static List<ServiceElement> computeServiceElement(String filepath){
+		Map<String, VariableDeclarationFragment> varmap = new HashMap<String, VariableDeclarationFragment>();
+		List<MethodInvocation> invoclist = new ArrayList<MethodInvocation>();
+		
+		parse(filepath, varmap, invoclist);
+		
+		List<ServiceElement> servelts = new ArrayList<>();
+		
+		for(MethodInvocation minvoc: invoclist){
+			@SuppressWarnings("unchecked")
+			List<Expression> args = minvoc.arguments();
+			String itf = findInterface(args.get(0));
+			String obj = findObj(args.get(1), varmap);
+			System.out.println("SERVICE: "+itf+"\t"+obj);
+			servelts.add(new ServiceElement(itf, obj));
+		}
+		
+		return servelts;
+	}
+	
+	
+	public static String findInterface(Expression expr){
+		if(expr instanceof StringLiteral){
+			return ((StringLiteral)expr).getLiteralValue();
+		}
+		if(expr instanceof MethodInvocation){
+			MethodInvocation tmpmi = (MethodInvocation)expr;
+			Expression tmpexpr = tmpmi.getExpression();
+			if(tmpexpr instanceof TypeLiteral){
+				return ((TypeLiteral)tmpexpr).getType().toString();
+			}
+		}
+		return "";
+	}
+	
+	public static String findObj(Expression expr, Map<String, VariableDeclarationFragment> varmap){
+		if(expr instanceof SimpleName){
+			String var = ((SimpleName)expr).getFullyQualifiedName();
+			VariableDeclarationFragment vdf = varmap.get(var);
+			if(vdf == null){
+				return "";
+			}
+
+			if(vdf.getInitializer() instanceof ClassInstanceCreation){
+				ClassInstanceCreation cic = (ClassInstanceCreation)vdf.getInitializer();
+				return cic.getType().toString();
+			}
+			
+			//si non instancie
+			if(vdf.getParent() instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement vds = (VariableDeclarationStatement)vdf.getParent();
+				return vds.getType().toString();
+			}
+
+			
+		}
+		return "";
+	}
+	
+	public static void parse(String filepath, Map<String, VariableDeclarationFragment> varmap, List<MethodInvocation> invoclist){
 		char[] source = convertFileIntoCharArray(filepath);
-		
-		
+
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
 	    parser.setSource(source);
 	    parser.setResolveBindings(true);
 	    CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-	    cu.accept(new ASTVisitor() {
-	        
-	  
-	    	
-	        @SuppressWarnings("unchecked")
-			public boolean visit(MethodInvocation node) {
-	        	if(!node.getName().toString().equals("registerService")){
-	        		return true;
-	        	}
-	        	System.out.print("Method:"+node.getName()+"\t");
-	        	List<Object> args = node.arguments();
-	        	if(!args.isEmpty()){
-	        		for(Object arg: args.subList(0, 2)){
-	        			if(arg instanceof SimpleName){
-	        				System.out.print(((SimpleName)arg).getFullyQualifiedName()+"\t");
-	        			} else if(arg instanceof QualifiedName){
-	        				System.out.print(((QualifiedName)arg).getFullyQualifiedName()+"\t");
-	        			} else if(arg instanceof MethodInvocation){
-	        				//if this is a instance call to getClass()
-	        				String itf = ((MethodInvocation)arg).toString();
-	        				itf = itf.substring(0,itf.indexOf('.'));
-	        				System.out.print(itf+"\t");
-	        			}else{
-	        				System.out.print("N/A:"+arg.getClass()+"\t");
-	        			}
-	        			
-	        		}
-	        	}
-	        	
-	        	System.out.println();
-	        	
-	            return true;
-	        }
-
-	        
-	        public boolean visit(SingleVariableDeclaration node){
-	        	System.out.println("Type:"+node.getType()+"\tname:"+node.getName());
-	        	return true;
-	        }
-	        
-	        public boolean visit(VariableDeclarationStatement node){
-	        	System.out.println(node.toString());
-	        	return true;
-	        }
-	        
-	    });
+	    cu.accept(new ASTVisitor(varmap, invoclist));
 	}
+	
+	
 	
 	
 	public static char[] convertFileIntoCharArray(String filename){
