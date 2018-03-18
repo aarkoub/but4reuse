@@ -14,6 +14,7 @@ import org.but4reuse.adapters.IElement;
 import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.ActivatorServiceBundleExtractor;
 import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.DependenciesBuilder;
 import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.PluginInfosExtractor;
+import org.but4reuse.adapters.pluginosgi.uml.UML;
 import org.but4reuse.utils.files.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -147,6 +148,10 @@ public class PluginOsgiAdapter implements IAdapter {
 				}
 			}
 		}
+		
+		/*System.out.println("ICI");
+		UML.makeUMLDiagram(elements, "C:\\Users\\Amel^^\\Desktop\\uml.txt");
+		UML.generateUMLDiagram("C:\\Users\\Amel^^\\Desktop\\uml.txt", "C:\\Users\\Amel^^\\Desktop\\uml.png");*/
 	}
 
 	/**
@@ -205,6 +210,7 @@ public class PluginOsgiAdapter implements IAdapter {
 					}
 				}
 			}
+			
 			monitor.worked(1);
 		}
 		// Replace bundles.info content
@@ -221,6 +227,8 @@ public class PluginOsgiAdapter implements IAdapter {
 				e.printStackTrace();
 			}
 		}
+
+		
 	}
 
 }
