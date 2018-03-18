@@ -53,13 +53,41 @@ public class PluginElement extends FileElement {
 	public double similarity(IElement anotherElement) {
 		// When they have the same relative URI
 		// TODO URIs can reference to the same file... check this
+		
+		double quotient = 0;
+		
 		if (anotherElement instanceof PluginElement) {
 			PluginElement anotherPluginElement = ((PluginElement) anotherElement);
 
 			// Same symbolic name
 			if (this.getSymbName().equals(anotherPluginElement.getSymbName())) {
-				// TODO no versioning supported
 				return 1;
+			}
+			else{
+				if(anotherPluginElement.getImport_packages().size()!=0){
+					for(PackageElement importPack : import_packages){
+						double sum=0;
+						for(PackageElement importPack2 : anotherPluginElement.getImport_packages()){
+							sum += importPack.similarity(importPack2);
+						}
+						if(sum!=0)
+							quotient+=sum/anotherPluginElement.getImport_packages().size();
+					}
+				}
+				if(anotherPluginElement.getExport_packages().size()!=0){
+					for(PackageElement exportPack : export_packages){
+						double sum=0;
+						for(PackageElement exportPack2 : anotherPluginElement.getExport_packages()){
+							sum+= exportPack.similarity(exportPack2);
+						}
+						if(sum!=0)
+							quotient+=sum/anotherPluginElement.getExport_packages().size();
+					}
+				}
+				if(quotient==0)
+					return 0;
+				
+				return quotient / (anotherPluginElement.getImport_packages().size()+anotherPluginElement.getExport_packages().size());
 			}
 		}
 		return 0;

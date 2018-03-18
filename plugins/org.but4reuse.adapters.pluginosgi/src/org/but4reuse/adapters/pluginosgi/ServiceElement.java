@@ -1,5 +1,7 @@
 package org.but4reuse.adapters.pluginosgi;
 
+import org.but4reuse.adapters.IElement;
+
 public class ServiceElement extends FileElement {
 	
 	private String interfaceName;
@@ -21,6 +23,20 @@ public class ServiceElement extends FileElement {
 		}else{
 			isObj = true;
 		}
+	}
+	
+	@Override
+	public double similarity(IElement anotherElement) {
+		//if they implements the same interface
+		if (anotherElement instanceof ServiceElement) {
+			ServiceElement anotherServiceElement = ((ServiceElement) anotherElement);
+
+			// Same interface
+			if (this.interfaceName.equals(anotherServiceElement.interfaceName)) {
+				return 1;
+			}
+		}
+		return 0;
 	}
 	
 	public String getInterfaceName(){
