@@ -148,7 +148,7 @@ public class PluginOsgiAdapter implements IAdapter {
 				}
 			}
 		}
-		
+		 
 		/*System.out.println("ICI");
 		UML.makeUMLDiagram(elements, "C:\\Users\\Amel^^\\Desktop\\uml.txt");
 		UML.generateUMLDiagram("C:\\Users\\Amel^^\\Desktop\\uml.txt", "C:\\Users\\Amel^^\\Desktop\\uml.png");*/
