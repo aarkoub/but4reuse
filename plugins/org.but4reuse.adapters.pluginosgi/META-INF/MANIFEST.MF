@@ -20,3 +20,5 @@ Export-Package: org.but4reuse.adapters.pluginosgi,
 Bundle-Vendor: BUT4Reuse
 Import-Package: org.eclipse.jdt.core,
  org.eclipse.jdt.core.dom
+Bundle-ClassPath: plantuml.jar,
+ .
