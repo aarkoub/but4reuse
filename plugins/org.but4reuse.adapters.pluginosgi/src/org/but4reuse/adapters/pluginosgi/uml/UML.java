@@ -16,7 +16,7 @@ public class UML {
 	private static FileWriter writer;
 
 
-	public static void makeUMLDiagram(List<IElement> elements, String destPath){
+	private static void makeUMLDiagram(List<IElement> elements, String destPath){
 		try {
 			writer = new FileWriter(new File(destPath));
 			writer.write("@startuml\n");
@@ -43,7 +43,9 @@ public class UML {
 	}
 	
 	
-	public static void generateUMLDiagram(String source, String pngDestination){
+	public static void generateUMLDiagram(List<IElement> elements, String source, String pngDestination){
+		
+		makeUMLDiagram(elements, source);
 		
 		SourceStringReader reader = new SourceStringReader(source);
 		// Write the first image to "png"

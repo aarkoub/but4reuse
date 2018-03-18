@@ -9,11 +9,19 @@
             id="pluginosgi"
             name="Plug-in OSGI">
          <elements>
+         
             <element
                   element="org.but4reuse.adapters.pluginosgi.PluginElement"></element>
             <element
                   element="org.but4reuse.adapters.pluginosgi.FileElement">
             </element>
+             <element
+                  element="org.but4reuse.adapters.pluginosgi.PackageElement">
+            </element>
+             <element
+                  element="org.but4reuse.adapters.pluginosgi.ServiceElement">
+            </element>
+            
          </elements>
       </adapter>
       <adapter
