@@ -16,17 +16,24 @@ public class UML {
 	private static FileWriter writer;
 
 
-	private static void makeUMLDiagram(List<IElement> elements, String destPath){
+	private static String makeUMLDiagram(List<IElement> elements, String destPath){
+		
+		StringBuilder sb = new StringBuilder();
+		
 		try {
 			writer = new FileWriter(new File(destPath));
-			writer.write("@startuml\n");
+			writer.write("@startuml\n\n");
+			sb.append("@startuml\n\n");
 			for(IElement elem : elements){
 				if(elem instanceof PluginElement){
-					
+					PluginElement plugElem = (PluginElement) elem;
+					writer.write("["+plugElem.getName()+"]\n");
+					sb.append("["+plugElem.getName()+"]\n");
 					
 				}
 			}
-			writer.write("@enduml");
+			writer.write("\n@enduml");
+			sb.append("\n@enduml");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -40,14 +47,17 @@ public class UML {
 			}
 		}
 		
+		return sb.toString();
+		
 	}
 	
 	
 	public static void generateUMLDiagram(List<IElement> elements, String source, String pngDestination){
 		
-		makeUMLDiagram(elements, source);
+		String content = makeUMLDiagram(elements, source);
 		
-		SourceStringReader reader = new SourceStringReader(source);
+		SourceStringReader reader = new SourceStringReader(content);
+		
 		// Write the first image to "png"
 		File pngFile = new File(pngDestination);
 		try {
