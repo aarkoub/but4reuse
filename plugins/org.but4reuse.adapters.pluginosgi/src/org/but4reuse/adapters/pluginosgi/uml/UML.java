@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.util.List;
 
 import org.but4reuse.adapters.IElement;
+import org.but4reuse.adapters.pluginosgi.PackageElement;
 import org.but4reuse.adapters.pluginosgi.PluginElement;
+import org.but4reuse.adapters.pluginosgi.ServiceElement;
 
 import net.sourceforge.plantuml.SourceStringReader;
 
@@ -27,9 +29,34 @@ public class UML {
 			for(IElement elem : elements){
 				if(elem instanceof PluginElement){
 					PluginElement plugElem = (PluginElement) elem;
-					writer.write("["+plugElem.getName()+"]\n");
-					sb.append("["+plugElem.getName()+"]\n");
+					boolean noServices = true;
 					
+					for(PackageElement packElem : plugElem.getExport_packages()){
+						
+						noServices = false;
+						
+						for(ServiceElement serv : packElem.getServices()){							
+							writer.write("["+plugElem.getName()+"]  - "+serv.getInterfaceName()+"\n");
+							sb.append("["+plugElem.getName()+"]  - "+serv.getInterfaceName()+"\n");
+						}
+					}
+					
+					for(PackageElement packElem : plugElem.getImport_packages()){
+						
+						noServices = false;
+						
+						for(ServiceElement serv : packElem.getServices()){							
+							writer.write(serv.getInterfaceName()+" -> ["+plugElem.getName()+"]\n");
+							sb.append(serv.getInterfaceName()+" -> ["+plugElem.getName()+"]\n");
+						}
+					}
+					
+					if(noServices){
+						writer.write("["+plugElem.getName()+"]\n");
+						sb.append("["+plugElem.getName()+"]\n");
+					}
+					
+										
 				}
 			}
 			writer.write("\n@enduml");
