@@ -55,6 +55,7 @@ public class PluginElement extends FileElement {
 		// TODO URIs can reference to the same file... check this
 		
 		double quotient = 0;
+		int i=0;
 		
 		if (anotherElement instanceof PluginElement) {
 			PluginElement anotherPluginElement = ((PluginElement) anotherElement);
@@ -69,9 +70,10 @@ public class PluginElement extends FileElement {
 						double sum=0;
 						for(PackageElement importPack2 : anotherPluginElement.getImport_packages()){
 							sum += importPack.similarity(importPack2);
+							i++;
 						}
-						if(sum!=0)
-							quotient+=sum/anotherPluginElement.getImport_packages().size();
+						
+						quotient+=sum;
 					}
 				}
 				if(anotherPluginElement.getExport_packages().size()!=0){
@@ -79,15 +81,16 @@ public class PluginElement extends FileElement {
 						double sum=0;
 						for(PackageElement exportPack2 : anotherPluginElement.getExport_packages()){
 							sum+= exportPack.similarity(exportPack2);
+							i++;
 						}
-						if(sum!=0)
-							quotient+=sum/anotherPluginElement.getExport_packages().size();
+						
+						quotient+=sum;
 					}
 				}
 				if(quotient==0)
 					return 0;
 				
-				return quotient / (anotherPluginElement.getImport_packages().size()+anotherPluginElement.getExport_packages().size());
+				return quotient / i;
 			}
 		}
 		return 0;
