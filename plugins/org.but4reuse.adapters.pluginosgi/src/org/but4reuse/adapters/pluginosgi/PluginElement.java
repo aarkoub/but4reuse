@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.but4reuse.adapters.IElement;
+import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
+import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.OnOffControlPluginElementStrategy;
 import org.but4reuse.utils.strings.StringUtils;
 
 /**
@@ -13,6 +15,7 @@ import org.but4reuse.utils.strings.StringUtils;
  * 
  * @author Diana MALABARD
  * @author Jason CHUMMUN
+ * 
  */
 public class PluginElement extends FileElement {
 
@@ -32,6 +35,7 @@ public class PluginElement extends FileElement {
 	private ArrayList<PackageElement> import_packages;
 	private ArrayList<PackageElement> export_packages;
 	private Map<String,String> services;
+	private ISimilarity similarityStrategy = new OnOffControlPluginElementStrategy();
 	
 	
 	public Map<String,String> getServices(){
@@ -46,54 +50,14 @@ public class PluginElement extends FileElement {
 		return export_packages;
 	}
 	
-	
+	public void setSimilarityStrategy(ISimilarity strategy){
+		this.similarityStrategy = strategy;
+	}
 	
 	
 	@Override
 	public double similarity(IElement anotherElement) {
-		// When they have the same relative URI
-		// TODO URIs can reference to the same file... check this
-		
-		double quotient = 0;
-		int i=0;
-		
-		if (anotherElement instanceof PluginElement) {
-			PluginElement anotherPluginElement = ((PluginElement) anotherElement);
-
-			// Same symbolic name
-			if (this.getSymbName().equals(anotherPluginElement.getSymbName())) {
-				return 1;
-			}
-			else{
-				if(anotherPluginElement.getImport_packages().size()!=0){
-					for(PackageElement importPack : import_packages){
-						double sum=0;
-						for(PackageElement importPack2 : anotherPluginElement.getImport_packages()){
-							sum += importPack.similarity(importPack2);
-							i++;
-						}
-						
-						quotient+=sum;
-					}
-				}
-				if(anotherPluginElement.getExport_packages().size()!=0){
-					for(PackageElement exportPack : export_packages){
-						double sum=0;
-						for(PackageElement exportPack2 : anotherPluginElement.getExport_packages()){
-							sum+= exportPack.similarity(exportPack2);
-							i++;
-						}
-						
-						quotient+=sum;
-					}
-				}
-				if(quotient==0)
-					return 0;
-				
-				return quotient / i;
-			}
-		}
-		return 0;
+		return similarityStrategy.similarity(this, anotherElement);
 	}
 
 	public ArrayList<String> getRequire_Bundles() {
