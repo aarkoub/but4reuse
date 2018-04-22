@@ -5,12 +5,13 @@ import java.util.List;
 
 import org.but4reuse.adapters.IElement;
 import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
+import org.but4reuse.adapters.pluginosgi.similarity.packageelement.AveragePackageElementStrategy;
 
 public class PackageElement extends FileElement {
 	
 	private String name;
 	private List<ServiceElement> services = new ArrayList<>();
-	private ISimilarity strategy;
+	private ISimilarity strategy = new AveragePackageElementStrategy();
 	
 	public PackageElement(String name){
 		this.name = name;

@@ -27,6 +27,7 @@ public class AveragePluginElementStrategy implements ISimilarity {
 						double sum=0;
 						importPack.setSimilarityStrategy(new AveragePackageElementStrategy());
 						for(PackageElement importPack2 : anotherPluginElement.getImport_packages()){
+							importPack2.setSimilarityStrategy(new AveragePackageElementStrategy());
 							sum += importPack.similarity(importPack2);
 							i++;
 						}
@@ -39,6 +40,7 @@ public class AveragePluginElementStrategy implements ISimilarity {
 						double sum=0;
 						exportPack.setSimilarityStrategy(new AveragePackageElementStrategy());
 						for(PackageElement exportPack2 : anotherPluginElement.getExport_packages()){
+							exportPack2.setSimilarityStrategy(new AveragePackageElementStrategy());
 							sum+= exportPack.similarity(exportPack2);
 							i++;
 						}
