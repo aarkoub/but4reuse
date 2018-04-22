@@ -5,7 +5,7 @@ import org.but4reuse.adapters.pluginosgi.PackageElement;
 import org.but4reuse.adapters.pluginosgi.ServiceElement;
 import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
 
-public class Average1PackageElementStrategy implements ISimilarity {
+public class AveragePackageElementStrategy implements ISimilarity {
 
 	@Override
 	public double similarity(IElement currentElement, IElement anotherElement) {

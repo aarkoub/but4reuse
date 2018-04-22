@@ -4,9 +4,9 @@ import org.but4reuse.adapters.IElement;
 import org.but4reuse.adapters.pluginosgi.PackageElement;
 import org.but4reuse.adapters.pluginosgi.PluginElement;
 import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
-import org.but4reuse.adapters.pluginosgi.similarity.packageelement.Average1PackageElementStrategy;
+import org.but4reuse.adapters.pluginosgi.similarity.packageelement.AveragePackageElementStrategy;
 
-public class Average1PluginElementStrategy implements ISimilarity {
+public class AveragePluginElementStrategy implements ISimilarity {
 
 	@Override
 	public double similarity(IElement currentElement, IElement anotherElement) {
@@ -25,7 +25,7 @@ public class Average1PluginElementStrategy implements ISimilarity {
 				if(anotherPluginElement.getImport_packages().size()!=0){
 					for(PackageElement importPack : currentPluginElement.getImport_packages()){
 						double sum=0;
-						importPack.setSimilarityStrategy(new Average1PackageElementStrategy());
+						importPack.setSimilarityStrategy(new AveragePackageElementStrategy());
 						for(PackageElement importPack2 : anotherPluginElement.getImport_packages()){
 							sum += importPack.similarity(importPack2);
 							i++;
@@ -37,7 +37,7 @@ public class Average1PluginElementStrategy implements ISimilarity {
 				if(anotherPluginElement.getExport_packages().size()!=0){
 					for(PackageElement exportPack : currentPluginElement.getExport_packages()){
 						double sum=0;
-						exportPack.setSimilarityStrategy(new Average1PackageElementStrategy());
+						exportPack.setSimilarityStrategy(new AveragePackageElementStrategy());
 						for(PackageElement exportPack2 : anotherPluginElement.getExport_packages()){
 							sum+= exportPack.similarity(exportPack2);
 							i++;

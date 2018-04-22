@@ -57,6 +57,7 @@ public class PluginElement extends FileElement {
 	
 	@Override
 	public double similarity(IElement anotherElement) {
+		System.out.println(similarityStrategy.similarity(this, anotherElement));
 		return similarityStrategy.similarity(this, anotherElement);
 	}
 
