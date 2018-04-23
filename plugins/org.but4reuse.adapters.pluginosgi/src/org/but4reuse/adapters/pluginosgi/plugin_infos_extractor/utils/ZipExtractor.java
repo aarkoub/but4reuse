@@ -13,7 +13,7 @@ public class ZipExtractor {
 	
 	public static void unZipAll(File source, File destination) throws IOException 
 	{
-	    System.out.println("Unzipping - " + source.getName());
+	    //System.out.println("Unzipping - " + source.getName());
 	    int BUFFER = 2048;
 
 	    ZipFile zip = new ZipFile(source);
@@ -79,7 +79,7 @@ public class ZipExtractor {
 	    } finally {
 	        zip.close();
 	    }
-	    System.out.println("Done Unzipping:" + source.getName());
+	    //System.out.println("Done Unzipping:" + source.getName());
 	}
 	
 	public static void deleteDirectory(File file){

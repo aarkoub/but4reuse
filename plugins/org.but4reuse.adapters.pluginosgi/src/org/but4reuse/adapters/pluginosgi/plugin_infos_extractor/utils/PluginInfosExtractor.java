@@ -113,22 +113,23 @@ public class PluginInfosExtractor {
 		
 		boolean deleteDirectory = false;
 		
+		PATH = plugin.getAbsolutePath();
+		if(PATH.endsWith(".jar")){
+			try {
+				ZipExtractor.unZipAll(new File(PATH), new File(PATH.substring(0, PATH.length()-4)));
+				PATH = PATH.substring(0, PATH.length()-4);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			deleteDirectory = true;
+		}
+		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		if(service_component != null){
 			String[] uri_xml ;
 			List<PackageElement> lexport_packages = plugin.getExport_packages();
 			uri_xml = service_component.split(",\\s+|,");
-			PATH = plugin.getAbsolutePath();
-			if(PATH.endsWith(".jar")){
-				try {
-					ZipExtractor.unZipAll(new File(PATH), new File(PATH.substring(0, PATH.length()-4)));
-					PATH = PATH.substring(0, PATH.length()-4);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				deleteDirectory = true;
-			}
 			
 			PackageElement p=null ;
 			
@@ -166,13 +167,21 @@ public class PluginInfosExtractor {
 			
 			//for(ServiceElement serv : p.getServices()) System.out.println(serv.getInterfaceName());
 			
-			if(deleteDirectory){
-				ZipExtractor.deleteDirectory(new File(PATH));
-			}
-			
 		}
 		
+		for(PackageElement pe: plugin.getImport_packages()){
+			String path = PATH+"\\"+pe.getName().replace(".", "\\");
+			parseActivator(new File(path), pe.getServices());
+		}
 		
+		for(PackageElement pe: plugin.getExport_packages()){
+			String path = PATH+"\\"+pe.getName().replace(".", "\\");
+			parseActivator(new File(path), pe.getServices());
+		}
+		
+		if(deleteDirectory){
+			ZipExtractor.deleteDirectory(new File(PATH));
+		}
 		// Name
 		currentLocalization = attributes.getValue(BUNDLE_LOCALIZATION);
 		if (currentLocalization == null) {
@@ -182,6 +191,23 @@ public class PluginInfosExtractor {
 		plugin.setName(name);
 	}
 
+	
+	public static List<ServiceElement> parseActivator(File f, List<ServiceElement> lse){
+		if(f.isDirectory()){
+			File[] listfiles = f.listFiles();
+			for(File tmpf: listfiles){
+				if(tmpf.isDirectory()){
+					parseActivator(tmpf, lse);
+				}else if(tmpf.getName().contains("Activator.java")){
+					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath());
+					lse.addAll(RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath()));
+				}
+			}
+		}
+		return lse;
+	}
+	
+	
 	/*
 	 * FOLDERS
 	 */
