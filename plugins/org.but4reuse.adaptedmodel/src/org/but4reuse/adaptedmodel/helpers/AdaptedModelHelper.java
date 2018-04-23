@@ -290,7 +290,7 @@ public class AdaptedModelHelper {
 		AdaptedModel am = (AdaptedModel) adaptedArtefact.eContainer();
 		for (Block block : am.getOwnedBlocks()) {
 			if (blocks.contains(block)) {
-				orderedBlocks.add(block);
+				orderedBlocks.add(block); 
 			}
 		}
 
