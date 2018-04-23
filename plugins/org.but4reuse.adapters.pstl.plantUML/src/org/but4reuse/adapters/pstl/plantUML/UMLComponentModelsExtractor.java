@@ -37,13 +37,10 @@ public class UMLComponentModelsExtractor {
 			// List<IElement>, URI)
 			// Get emf adapter
 			// retrieve the common block
-			Block baseBlock = AdaptedModelHelper.getCommonBlocks(adaptedModel).get(0);
-			List<IElement> elements = AdaptedModelHelper.getElementsOfBlock(baseBlock);
+			List<IElement> elements ;
 			List<Block> blocks = AdaptedModelHelper.getCommonBlocks(adaptedModel);
-			
-			UML.generateUMLDiagram(elements, "./Block0Uml.txt", "./Block0Uml.png");
-			
-			for(int i=1; i<blocks.size(); i++){
+						
+			for(int i=0; i<blocks.size(); i++){
 				elements = AdaptedModelHelper.getElementsOfBlock(blocks.get(i));
 				UML.generateUMLDiagram(elements, "./Block"+i+"Uml.txt", "./Block"+i+"Uml.png");
 			}
