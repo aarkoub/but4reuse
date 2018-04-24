@@ -28,9 +28,7 @@ public class UMLComponentModelsExtractor {
 			List<Block> blocks = adaptedModel.getOwnedBlocks();
 			
 			 File directory = new File(constructionURI);
-			 if (! directory.exists()){
-			    directory.mkdirs();
-			 }
+			 directory.mkdirs();
 			
 			for(int i=0; i<blocks.size(); i++){
 				elements = AdaptedModelHelper.getElementsOfBlock(blocks.get(i));
