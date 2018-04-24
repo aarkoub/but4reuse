@@ -50,6 +50,25 @@ public class XMLParser {
 		
 	}
 	
+	public static List<String> getReferencedInterfaceNames(Document doc){
+		
+		List<String> interfacesNames = new ArrayList<>();
+		
+		NodeList nodeList = doc.getElementsByTagName("reference");
+		
+		for(int i=0; i<nodeList.getLength(); i++){
+			
+			if(nodeList.item(i).getAttributes().getNamedItem("interface")!=null){
+				interfacesNames.add(nodeList.item(i).getAttributes().getNamedItem("interface").getNodeValue());
+			}
+			
+		}
+		
+		
+		return interfacesNames;
+		
+	}
+	
 	public static List<String> getProvidedInterfaceNames(Document doc){
 
 		
@@ -76,7 +95,8 @@ public class XMLParser {
 			doc = docBuilder.parse(new File(path));
 			impl.add(getImplementationClass(doc));
 			infos.add(impl);
-			infos.add(getProvidedInterfaceNames(doc));	
+			infos.add(getProvidedInterfaceNames(doc));
+			infos.add(getReferencedInterfaceNames(doc));
 			
 		} catch (SAXException | IOException e) {
 			// TODO Auto-generated catch block

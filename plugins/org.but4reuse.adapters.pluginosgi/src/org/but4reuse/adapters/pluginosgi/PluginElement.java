@@ -36,8 +36,8 @@ public class PluginElement extends FileElement {
 	private ArrayList<PackageElement> import_packages;
 	private ArrayList<PackageElement> export_packages;
 	private Map<String,String> services;
-	private ISimilarity similarityStrategy = new AveragePluginElementStrategy();
-	//private ISimilarity similarityStrategy = new OnOffControlPluginElementStrategy();
+	//private ISimilarity similarityStrategy = new AveragePluginElementStrategy();
+	private ISimilarity similarityStrategy = new OnOffControlPluginElementStrategy();
 	
 	
 	public Map<String,String> getServices(){
@@ -59,7 +59,7 @@ public class PluginElement extends FileElement {
 	
 	@Override
 	public double similarity(IElement anotherElement) {
-		System.out.println(this.getSymbName()+" "+((anotherElement instanceof PluginElement)?((PluginElement)anotherElement).getSymbName():"")+" "+similarityStrategy.similarity(this, anotherElement));
+		//System.out.println(this.getSymbName()+" "+((anotherElement instanceof PluginElement)?((PluginElement)anotherElement).getSymbName():"")+" "+similarityStrategy.similarity(this, anotherElement));
 		return similarityStrategy.similarity(this, anotherElement);
 	}
 

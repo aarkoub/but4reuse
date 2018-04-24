@@ -2,10 +2,13 @@ package org.but4reuse.adapters.pstl.plantUML;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import org.but4reuse.adaptedmodel.AdaptedModel;
 import org.but4reuse.adaptedmodel.Block;
+import org.but4reuse.adaptedmodel.ElementWrapper;
 import org.but4reuse.adaptedmodel.helpers.AdaptedModelHelper;
+import org.but4reuse.adapters.IDependencyObject;
 import org.but4reuse.adapters.IElement;
 
 import org.but4reuse.adapters.pluginosgi.uml.UML;
@@ -34,6 +37,16 @@ public class UMLComponentModelsExtractor {
 				elements = AdaptedModelHelper.getElementsOfBlock(blocks.get(i));
 				UML.generateUMLDiagram(elements, constructionURI+"Block"+i+"Uml.txt", constructionURI+"Block"+i+"Uml.png");
 			}
+			
+			/*elements = AdaptedModelHelper.getElementsOfBlock(blocks.get(1));
+			Map<IElement, ElementWrapper> ieewMap = AdaptedModelHelper.createMapIEEW(adaptedModel);
+			for(IElement element : elements){
+				List<IDependencyObject> dep = AdaptedModelHelper.getDependingOnIElement(adaptedModel, element, ieewMap);
+				for(IDependencyObject d : dep){
+					System.out.println(d.getDependencyObjectText());
+				}
+				
+			}*/
 			
 			System.out.println("END construct plant UML component models");
 	}

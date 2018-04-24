@@ -127,12 +127,15 @@ public class PluginInfosExtractor {
 		}
 		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
+		
 		if(service_component != null){
+			
 			String[] uri_xml ;
 			List<PackageElement> lexport_packages = plugin.getExport_packages();
+			List<PackageElement> limport_packages = plugin.getImport_packages();
+			
 			uri_xml = service_component.split(",\\s+|,");
 			
-			PackageElement p=null ;
 			
 			for(String uri : uri_xml){
 				//System.out.println(uri);
@@ -145,24 +148,13 @@ public class PluginInfosExtractor {
 					implClass = implClassList.get(0);
 				
 				//System.out.println("Implem : "+implClass);
-					
-				List<String> interfaceNames = infos.get(1);
 				
-				for(String n : interfaceNames ) {
-					String[] words = n.split("\\.");
-					
-					String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
-
-					//System.out.println("Interface name "+n);
-					
-					if((p=findPackage(packageName, lexport_packages))==null){
-						//System.out.println("Package name "+packageName);
-						
-						p = new PackageElement(packageName);
-						lexport_packages.add(p);
-					}
-					p.addService(new ServiceElement(n, implClass));
-				}
+				//for provided interfaces
+				addPackages(implClass, infos.get(1), lexport_packages);
+				
+				//for required interfaces
+				addPackages(implClass, infos.get(2), limport_packages);	
+				
 
 			}
 			
@@ -414,6 +406,30 @@ public class PluginInfosExtractor {
 			}
 		}
 		return null;
+	}
+	
+	private static void addPackages(String implClass, List<String> interfaceNames, List<PackageElement> lpackages){
+		
+
+		PackageElement p ;
+		
+		for(String n : interfaceNames ) {
+			
+			
+			String[] words = n.split("\\.");
+			
+			String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+
+			//System.out.println("Interface name "+n);
+			
+			if((p=findPackage(packageName, lpackages))==null){
+				//System.out.println("Package name "+packageName);
+				
+				p = new PackageElement(packageName);
+				lpackages.add(p);
+			}
+			p.addService(new ServiceElement(n, implClass));
+		}
 	}
 	
 	
