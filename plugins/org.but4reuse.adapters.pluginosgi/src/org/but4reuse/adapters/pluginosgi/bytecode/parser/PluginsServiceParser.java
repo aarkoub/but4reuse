@@ -35,7 +35,7 @@ public class PluginsServiceParser {
 		
 		File[] plugins = f.listFiles();
 		
-		PluginsServiceParser psp = new PluginsServiceParser();
+
 		
 		for(File plugin : plugins) {
 			if(! plugin.isDirectory()) {
@@ -48,17 +48,18 @@ public class PluginsServiceParser {
 			            	pluginName = plugin.getName();
 			            	jarEntry = je.getName();
 			            	InputStream is = jarFile.getInputStream(je);			            	
-			            	psp.parsePluginClass(is, new ArrayList<ServiceElement>());
+			            	parsePluginClass(is, new ArrayList<ServiceElement>());
 			            }
 			         }
 				}
 			}
 		}
-		System.out.println("Nombre total de registerService : "+psp.cpt);
+		System.out.println("Nombre total de registerService : "+cpt);
+		cpt = 0;
 	}
 	
-	int cpt = 0;
-	public List<ServiceElement> parsePluginClass(InputStream is, List<ServiceElement> lse) throws IOException {
+	static int cpt = 0;
+	public static List<ServiceElement> parsePluginClass(InputStream is, List<ServiceElement> lse) throws IOException {
 				
 		ClassReader cr = new ClassReader(is);
 		

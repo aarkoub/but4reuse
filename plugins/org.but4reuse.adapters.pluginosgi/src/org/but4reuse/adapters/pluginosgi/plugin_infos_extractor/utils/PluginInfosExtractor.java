@@ -19,6 +19,7 @@ import java.util.zip.ZipEntry;
 import org.but4reuse.adapters.pluginosgi.PackageElement;
 import org.but4reuse.adapters.pluginosgi.PluginElement;
 import org.but4reuse.adapters.pluginosgi.ServiceElement;
+import org.but4reuse.adapters.pluginosgi.bytecode.parser.PluginsServiceParser;
 import org.but4reuse.utils.files.FileUtils;
 
 public class PluginInfosExtractor {
@@ -172,11 +173,13 @@ public class PluginInfosExtractor {
 		for(PackageElement pe: plugin.getImport_packages()){
 			String path = PATH+"\\"+pe.getName().replace(".", "\\");
 			parseActivator(new File(path), pe.getServices());
+			//parseBytecode(new File(path), pe.getServices());
 		}
 		
 		for(PackageElement pe: plugin.getExport_packages()){
 			String path = PATH+"\\"+pe.getName().replace(".", "\\");
 			parseActivator(new File(path), pe.getServices());
+			//parseBytecode(new File(path), pe.getServices());
 		}
 		
 		if(deleteDirectory){
@@ -207,6 +210,26 @@ public class PluginInfosExtractor {
 		return lse;
 	}
 	
+	public static List<ServiceElement> parseBytecode(File f, List<ServiceElement> lse){
+		if(f.isDirectory()){
+			File[] listfiles = f.listFiles();
+			for(File tmpf: listfiles){
+				if(tmpf.isDirectory()){
+					parseBytecode(tmpf, lse);
+				}else if(tmpf.getName().contains(".class")){
+					System.out.println("BYTECODE TROUVE "+tmpf.getAbsolutePath());
+					try {
+						PluginsServiceParser.parsePluginClass(new FileInputStream(tmpf), lse);
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return lse;
+	}
 	
 	/*
 	 * FOLDERS
