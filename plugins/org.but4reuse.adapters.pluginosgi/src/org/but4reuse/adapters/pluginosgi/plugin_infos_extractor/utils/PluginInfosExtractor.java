@@ -173,13 +173,13 @@ public class PluginInfosExtractor {
 		for(PackageElement pe: plugin.getImport_packages()){
 			String path = PATH+"\\"+pe.getName().replace(".", "\\");
 			parseActivator(new File(path), pe.getServices());
-			//parseBytecode(new File(path), pe.getServices());
+			parseBytecode(new File(path), pe.getServices());
 		}
 		
 		for(PackageElement pe: plugin.getExport_packages()){
 			String path = PATH+"\\"+pe.getName().replace(".", "\\");
 			parseActivator(new File(path), pe.getServices());
-			//parseBytecode(new File(path), pe.getServices());
+			parseBytecode(new File(path), pe.getServices());
 		}
 		
 		if(deleteDirectory){

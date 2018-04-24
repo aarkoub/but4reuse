@@ -22,4 +22,10 @@ Bundle-Vendor: BUT4Reuse
 Import-Package: org.eclipse.jdt.core,
  org.eclipse.jdt.core.dom
 Bundle-ClassPath: plantuml.jar,
- .
+ .,
+ lib/asm-6.0.jar,
+ lib/asm-analysis-6.0.jar,
+ lib/asm-commons-6.0.jar,
+ lib/asm-tree-6.0.jar,
+ lib/asm-util-6.0.jar,
+ lib/org.eclipse.osgi_3.7.1.R37x_v20110808-1106.jar
