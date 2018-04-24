@@ -126,6 +126,14 @@ public class PluginInfosExtractor {
 			deleteDirectory = true;
 		}
 		
+		for(PackageElement pe: plugin.getExport_packages()){
+			String path = PATH+"\\"+pe.getName().replace(".", "\\");
+			//parseBytecode(new File(path), pe.getServices());
+		}
+		
+		parseActivator(new File(PATH), plugin.getExport_packages(), "");
+		
+		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		
 		if(service_component != null){
@@ -161,18 +169,8 @@ public class PluginInfosExtractor {
 			//for(ServiceElement serv : p.getServices()) System.out.println(serv.getInterfaceName());
 			
 		}
+
 		
-		for(PackageElement pe: plugin.getImport_packages()){
-			String path = PATH+"\\"+pe.getName().replace(".", "\\");
-			parseActivator(new File(path), pe.getServices());
-			parseBytecode(new File(path), pe.getServices());
-		}
-		
-		for(PackageElement pe: plugin.getExport_packages()){
-			String path = PATH+"\\"+pe.getName().replace(".", "\\");
-			parseActivator(new File(path), pe.getServices());
-			parseBytecode(new File(path), pe.getServices());
-		}
 		
 		if(deleteDirectory){
 			ZipExtractor.deleteDirectory(new File(PATH));
@@ -187,15 +185,18 @@ public class PluginInfosExtractor {
 	}
 
 	
-	public static List<ServiceElement> parseActivator(File f, List<ServiceElement> lse){
+	public static List<PackageElement> parseActivator(File f, List<PackageElement> lse, String packagename){
+		//System.out.println(f.getAbsolutePath());
 		if(f.isDirectory()){
 			File[] listfiles = f.listFiles();
 			for(File tmpf: listfiles){
 				if(tmpf.isDirectory()){
-					parseActivator(tmpf, lse);
+					parseActivator(tmpf, lse, packagename+(packagename==""?"":".")+tmpf.getName());
 				}else if(tmpf.getName().contains("Activator.java")){
-					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath());
-					lse.addAll(RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath()));
+					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath()+"\t package name:"+packagename);
+					PackageElement pe = new PackageElement(packagename);
+					pe.getServices().addAll(RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath()));
+					lse.add(pe);
 				}
 			}
 		}
@@ -209,7 +210,7 @@ public class PluginInfosExtractor {
 				if(tmpf.isDirectory()){
 					parseBytecode(tmpf, lse);
 				}else if(tmpf.getName().contains(".class")){
-					System.out.println("BYTECODE TROUVE "+tmpf.getAbsolutePath());
+					//System.out.println("BYTECODE TROUVE "+tmpf.getAbsolutePath());
 					try {
 						PluginsServiceParser.parsePluginClass(new FileInputStream(tmpf), lse);
 					} catch (FileNotFoundException e) {

@@ -83,13 +83,13 @@ public class PluginsServiceParser {
 					MethodInsnNode minstr = (MethodInsnNode)instr;
 					//System.out.println("Trouvé une invocation de la méthode (instruction n° "+i+") : "+minstr.owner+"."+minstr.name+minstr.desc);
 					if(minstr.name.equals("registerService")) { // Remplacer "n" par "registerSerivce" ou inversement (pour tester le code tout en bas)
-						System.out.println("=> Trouve une invocation a registerService ");
-						System.out.println("=> dans la methode "+mn.name+" de la classe : <"+jarEntry+"> dans le plugin <"+pluginName+"> :");
+						//System.out.println("=> Trouve une invocation a registerService ");
+						//System.out.println("=> dans la methode "+mn.name+" de la classe : <"+jarEntry+"> dans le plugin <"+pluginName+"> :");
 						cpt++;
 						AbstractInsnNode ains = instructions.get(i-4); // Pour connaître le 2ème argument de l'invocation à registerService, il faut remonter à l'instruction -4
 						
-						System.out.println("\t Operation precedente, correspondant au 2eme argument passe (instruction "+(i-4)+") :"+ ains.getOpcode());
-						System.out.println("\t Type du service enregistre : ");
+						//System.out.println("\t Operation precedente, correspondant au 2eme argument passe (instruction "+(i-4)+") :"+ ains.getOpcode());
+						//System.out.println("\t Type du service enregistre : ");
 						switch(ains.getOpcode()) {						
 						case -1 :
 						case 1 :
@@ -100,7 +100,7 @@ public class PluginsServiceParser {
 								boolean found = false;
 								for(LocalVariableNode lvar : lvars) {
 									if(lvar.index == ins.var) {
-										System.out.println("\t Local Variable/Param Type : "+lvar.desc);
+										//System.out.println("\t Local Variable/Param Type : "+lvar.desc);
 										lse.add(new ServiceElement("",convertService(lvar.desc)));
 										found = true;
 										break;
@@ -120,7 +120,7 @@ public class PluginsServiceParser {
 							break;
 						case 18 : // LDC (Load Constant)
 							LdcInsnNode lins = (LdcInsnNode)ains;							
-							System.out.println("\t Constant Type : "+lins.cst);
+							//System.out.println("\t Constant Type : "+lins.cst);
 							lse.add(new ServiceElement("",convertService(lins.cst.toString())));
 							break;							
 						case 25 : // Accès à une variable locale ou bien un paramètre : VarInsnNode
@@ -129,7 +129,7 @@ public class PluginsServiceParser {
 							boolean found = false;
 							for(LocalVariableNode lvar : lvars) {
 								if(lvar.index == ins.var) {
-									System.out.println("\t Local Variable/Param Type : "+lvar.desc);
+									//System.out.println("\t Local Variable/Param Type : "+lvar.desc);
 									lse.add(new ServiceElement("",convertService(lvar.desc)));
 									found = true;
 									break;
@@ -144,7 +144,7 @@ public class PluginsServiceParser {
 								MethodInsnNode insm = (MethodInsnNode)ains;
 								if(insm.name.equals("<init>")) { // Appel de constructeur
 									TypeInsnNode inst = (TypeInsnNode)(insm.getPrevious().getPrevious()); // En cas d'instanciation avec new, il faut remonter deux instructions plus haut pour retrouver l'expression de Type utilisée
-									System.out.println("\t Instantiation Type : "+inst.desc);
+									//System.out.println("\t Instantiation Type : "+inst.desc);
 									lse.add(new ServiceElement("",convertService(inst.desc)));
 									break;
 								}
@@ -156,7 +156,7 @@ public class PluginsServiceParser {
 									found = false;
 									for(LocalVariableNode lvar : lvars) {
 										if(lvar.index == ins.var) {
-											System.out.println("\t Local Variable/Param Type : "+lvar.desc);
+											//System.out.println("\t Local Variable/Param Type : "+lvar.desc);
 											lse.add(new ServiceElement("",convertService(lvar.desc)));
 											found = true;
 											break;
@@ -173,7 +173,7 @@ public class PluginsServiceParser {
 							
 							if(ains instanceof FieldInsnNode){
 								FieldInsnNode insf = (FieldInsnNode)ains;
-								System.out.println("\t Field Type : "+insf.desc);
+								//System.out.println("\t Field Type : "+insf.desc);
 								lse.add(new ServiceElement("",convertService(insf.desc)));
 							}
 							
@@ -183,7 +183,7 @@ public class PluginsServiceParser {
 							MethodInsnNode insm = (MethodInsnNode)ains;
 							if(insm.name.equals("<init>")) { // Appel de constructeur
 								TypeInsnNode inst = (TypeInsnNode)(insm.getPrevious().getPrevious()); // En cas d'instanciation avec new, il faut remonter deux instructions plus haut pour retrouver l'expression de Type utilisée
-								System.out.println("\t Instantiation Type : "+inst.desc);
+								//System.out.println("\t Instantiation Type : "+inst.desc);
 								lse.add(new ServiceElement("",convertService(inst.desc)));
 								break;
 							}							
@@ -191,16 +191,16 @@ public class PluginsServiceParser {
 						case 184: // Invocation de méthode statique : MethodInsnNode
 						case 185: // Invocation de méthode d'interface : MethodInsnNode
 							insm = (MethodInsnNode)ains;
-							System.out.println("\t Method/Constructor Returned Object Type : "+insm.desc);
+							//System.out.println("\t Method/Constructor Returned Object Type : "+insm.desc);
 							lse.add(new ServiceElement("",convertService(insm.desc)));
 							break;
 						case 192: // Cast de type
 						case 187: // Instanciation de type
 							TypeInsnNode inst = (TypeInsnNode)ains;
-							System.out.println("\t Instantiation Type : "+inst.desc);
+							//System.out.println("\t Instantiation Type : "+inst.desc);
 							lse.add(new ServiceElement("",convertService(inst.desc)));
 							break;
-						default: System.out.println("# Type non trouvé pour "+ains.getOpcode()+" : "+ains.getClass()); 
+						default: //System.out.println("# Type non trouvé pour "+ains.getOpcode()+" : "+ains.getClass()); 
 								throw new RuntimeException("Façon de passer un argument non prise en compte : "+
 									ains.getOpcode()+"\n Instruction de type "+ains.getClass());
 						
@@ -215,9 +215,9 @@ public class PluginsServiceParser {
 	
 	
 	public static String convertService(String name){
-		String service = name.replace("/", ".").replace("(", "").replace(")","").replace(";","");
+		String service = name.replace("/", ".").replace("(", "").replace(")","").replace(";","").replace("[", "");
 		service = service.charAt(0)=='L'?service.substring(1):service;
-		System.out.println("\t "+service);
+		System.out.println("Service bytecode: "+service);
 		return service;
 	}
 }
