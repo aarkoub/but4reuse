@@ -38,8 +38,23 @@ public class CreateComponentUMLAction implements IViewActionDelegate {
 		String constructionURI = inputDialog.getValue();
 		AdaptedModel adaptedModel = AdaptedModelManager.getAdaptedModel();
 
+		inputDialog = new URISelectionDialog(Display.getCurrent().getActiveShell(),
+				"UML component model threhold", "Insert threshold of composant per image ", "25");
+		if (inputDialog.open() != Dialog.OK) {
+			return;
+		}
+		int threshold = Integer.parseInt(inputDialog.getValue());
+		
+		inputDialog = new URISelectionDialog(Display.getCurrent().getActiveShell(),
+				"UML component model numbre of levels", "Insert number of levels of composant symbolic name to organize", "3");
+		if (inputDialog.open() != Dialog.OK) {
+			return;
+		}
+		
+		int nbLevel = Integer.parseInt(inputDialog.getValue());
+		
 		// Call the extractor
-		UMLComponentModelsExtractor.createComponentModels(constructionURI, adaptedModel);
+		UMLComponentModelsExtractor.createComponentModels(constructionURI, threshold, nbLevel, adaptedModel);
 	}
 
 	@Override
