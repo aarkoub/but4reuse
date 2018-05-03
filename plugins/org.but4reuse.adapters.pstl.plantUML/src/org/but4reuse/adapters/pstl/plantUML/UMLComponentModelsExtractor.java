@@ -32,7 +32,7 @@ public class UMLComponentModelsExtractor {
 			directory.mkdirs();
 			
 			for(String f : directory.list()){
-				ZipExtractor.deleteDirectory(new File(f));
+				ZipExtractor.deleteDirectory(new File(directory.getPath(), f));
 			}
 			 
 			for(int i=0; i<blocks.size(); i++){
