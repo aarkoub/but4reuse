@@ -48,8 +48,15 @@ public class RegisterServiceParser {
 			List<Expression> args = minvoc.arguments();
 			String itf = findInterface(args.get(0), varmap);
 			String obj = findObj(args.get(1), varmap, assignmap, filepath);
-			System.out.println("SERVICE: itf: "+itf+"\t obj: "+obj);
+			
+			if(itf.length()!=0){
+				String [] structure = itf.split("\\.");
+				
+				System.out.println("SERVICE: itf: "+structure[structure.length-1]+"\t obj: "+obj);
+				itf = structure[structure.length-1];
+			}
 			servelts.add(new ServiceElement(itf, obj));
+			
 		}
 		
 		return servelts;
@@ -61,7 +68,7 @@ public class RegisterServiceParser {
 		if(expr instanceof StringLiteral){
 			return ((StringLiteral)expr).getLiteralValue();
 		} else if(expr instanceof MethodInvocation && expr.toString().contains(".class.getName()")){
-			//dans le cas où on effectue un "NomClass.class.getName()"
+			//dans le cas oï¿½ on effectue un "NomClass.class.getName()"
 			MethodInvocation tmpmi = (MethodInvocation)expr;
 			Expression tmpexpr = tmpmi.getExpression();
 			if(tmpexpr instanceof TypeLiteral){

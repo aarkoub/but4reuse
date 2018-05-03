@@ -192,11 +192,12 @@ public class PluginInfosExtractor {
 			for(File tmpf: listfiles){
 				if(tmpf.isDirectory()){
 					parseActivator(tmpf, lse, packagename+(packagename==""?"":".")+tmpf.getName());
-				}else if(tmpf.getName().contains("Activator.java")){
+				}else if((tmpf.getName().contains("Activator") || tmpf.getName().contains("activator")) && tmpf.getName().contains(".java")){
 					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath()+"\t package name:"+packagename);
-					PackageElement pe = new PackageElement(packagename);
-					pe.getServices().addAll(RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath()));
-					lse.add(pe);
+					
+					List<ServiceElement> listServices = RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath());
+					addPackagesServices(packagename, lse, listServices);
+					
 				}
 			}
 		}
@@ -409,6 +410,13 @@ public class PluginInfosExtractor {
 		return null;
 	}
 	
+	/**
+	 * Creates the packages and services along a list of interfaces implemented by the implemention class, 
+	 * and adds the created packages to the list of packages 
+	 * @param implClass the name of the implemented class of the services
+	 * @param interfaceNames the names of all the interfaces implemented 
+	 * @param lpackages the list of packages where the new packages need to be added
+	 */
 	private static void addPackages(String implClass, List<String> interfaceNames, List<PackageElement> lpackages){
 		
 
@@ -433,5 +441,38 @@ public class PluginInfosExtractor {
 		}
 	}
 	
+	/**
+	 * Add a list of services to the package referenced by its name, making sure that the package nor the service already exists
+	 * @param packageName the name of the package
+	 * @param lpackages the list of the packages where it is to be added
+	 * @param lservices the list of services to add to the package
+	 */
+	private static void addPackagesServices(String packageName, List<PackageElement> lpackages, List<ServiceElement> lservices){
+		
+		PackageElement p;
+		
+		if((p=findPackage(packageName, lpackages))==null){
+			
+			p = new PackageElement(packageName);
+			lpackages.add(p);
+		}
+		
+		for(ServiceElement servToAdd : lservices){
+			boolean needToAdd = true;
+			for(ServiceElement serv : p.getServices()){
+				if(servToAdd.equals(serv)){
+					needToAdd = false;
+					break;
+				}
+			}
+			
+			if(needToAdd){
+				p.getServices().add(servToAdd);
+				System.out.println("Ajout du service "+servToAdd.getInterfaceName()+" dans "+p.getName());
+			}
+			
+		}
+
+	}
 	
 }

@@ -47,6 +47,10 @@ public class ServiceElement extends FileElement {
 		return objName;
 	}
 	
+	public void setInterfaceName(String name){
+		interfaceName = name;
+	}
+	
 	public boolean isInterface(){
 		return isInterface;
 	}

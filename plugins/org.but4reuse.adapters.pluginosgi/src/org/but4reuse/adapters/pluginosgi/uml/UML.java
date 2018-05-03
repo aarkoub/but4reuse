@@ -36,7 +36,8 @@ public class UML {
 						
 						
 						
-						for(ServiceElement serv : packElem.getServices()){	
+						for(ServiceElement serv : packElem.getServices()){
+							if(!serv.isInterface()) continue;
 							noServices = false;
 							writer.write("["+plugElem.getName()+"]  - "+serv.getInterfaceName()+"\n");
 							sb.append("["+plugElem.getName()+"]  - "+serv.getInterfaceName()+"\n");
@@ -48,6 +49,7 @@ public class UML {
 						
 						
 						for(ServiceElement serv : packElem.getServices()){	
+							if(!serv.isInterface()) continue;
 							noServices = false;
 							writer.write(serv.getInterfaceName()+" <- ["+plugElem.getName()+"]\n");
 							sb.append(serv.getInterfaceName()+" <- ["+plugElem.getName()+"]\n");
