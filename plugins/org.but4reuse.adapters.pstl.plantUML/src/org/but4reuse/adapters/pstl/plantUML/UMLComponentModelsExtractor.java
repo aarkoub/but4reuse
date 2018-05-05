@@ -1,6 +1,8 @@
 package org.but4reuse.adapters.pstl.plantUML;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.but4reuse.adaptedmodel.AdaptedModel;
@@ -27,7 +29,16 @@ public class UMLComponentModelsExtractor {
 
 			List<IElement> elements ;
 			List<Block> blocks = adaptedModel.getOwnedBlocks();
-						
+			
+			try {
+				URI uri = new URI(constructionURI);
+				constructionURI = uri.getPath();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
 			File directory = new File(constructionURI);
 			directory.mkdirs();
 			

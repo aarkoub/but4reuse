@@ -31,7 +31,7 @@ public class CreateComponentUMLAction implements IViewActionDelegate {
 			out = output.getFullPath().toString();
 		}
 		URISelectionDialog inputDialog = new URISelectionDialog(Display.getCurrent().getActiveShell(),
-				"UML component model container URI", "Insert container URI for UML component model ", "./resource" + out + "/uml/");
+				"UML component model container URI", "Insert container URI for UML component model ", "platform:/resource" + out + "/uml/");
 		if (inputDialog.open() != Dialog.OK) {
 			return;
 		}
