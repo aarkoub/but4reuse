@@ -16,10 +16,12 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -28,18 +30,25 @@ public class RegisterServiceParser {
 	
 	public static void main(String[] args){
 		//parse("C:\\Users\\L-C\\Desktop\\Activator.java", new HashMap<String, VariableDeclarationFragment>(), new ArrayList<MethodInvocation>());
-		computeServiceElement("C:\\Users\\L-C\\Desktop\\Activator.java");
+		/*for(int i = 0; i < 88; i++){
+			System.out.println("------ Traitement de Activator"+i+".java -----");
+			computeServiceElement("C:\\Users\\L-C\\Desktop\\Activators\\Activator"+i+".java");
+			System.out.println("------ Fin de Activator"+i+".java -----");
+		}
+		*/
+		computeServiceElement("C:\\Users\\L-C\\Desktop\\org.eclipse.equinox.http.servlet.source_1.1.500.v20140318-1755\\org\\eclipse\\equinox\\http\\servlet\\internal\\Activator.java",
+				"C:\\Users\\L-C\\Desktop\\org.eclipse.equinox.http.servlet.source_1.1.500.v20140318-1755");
 	}
 	
 	
 	
 	
-	public static List<ServiceElement> computeServiceElement(String filepath){
+	public static List<ServiceElement> computeServiceElement(String filepath, String classpath){
 		Map<String, VariableDeclarationFragment> varmap = new HashMap<String, VariableDeclarationFragment>();
 		List<MethodInvocation> invoclist = new ArrayList<MethodInvocation>();
 		Map<String, String> assignmap = new HashMap<String, String>();
 		
-		parse(filepath, varmap, invoclist, assignmap);
+		parse(filepath, classpath, varmap, invoclist, assignmap);
 		
 		List<ServiceElement> servelts = new ArrayList<>();
 		
@@ -48,13 +57,7 @@ public class RegisterServiceParser {
 			List<Expression> args = minvoc.arguments();
 			String itf = findInterface(args.get(0), varmap);
 			String obj = findObj(args.get(1), varmap, assignmap, filepath);
-			
-			if(itf.length()!=0){
-				String [] structure = itf.split("\\.");
-				
-				System.out.println("SERVICE: itf: "+structure[structure.length-1]+"\t obj: "+obj);
-				itf = structure[structure.length-1];
-			}
+			System.out.println("SERVICE: itf: "+itf+"\t obj: "+obj);
 			servelts.add(new ServiceElement(itf, obj));
 			
 		}
@@ -72,7 +75,9 @@ public class RegisterServiceParser {
 			MethodInvocation tmpmi = (MethodInvocation)expr;
 			Expression tmpexpr = tmpmi.getExpression();
 			if(tmpexpr instanceof TypeLiteral){
-				return ((TypeLiteral)tmpexpr).getType().toString();
+				Type t = ((TypeLiteral)tmpexpr).getType();
+				ITypeBinding itb = t.resolveBinding();
+				return itb!=null?itb.getQualifiedName():"";
 			}
 		} else if (expr instanceof TypeLiteral && expr.toString().contains(".class")){
 			return expr.toString().substring(0, expr.toString().length()-6);
@@ -102,20 +107,20 @@ public class RegisterServiceParser {
 
 			if(vdf.getInitializer() instanceof ClassInstanceCreation){
 				ClassInstanceCreation cic = (ClassInstanceCreation)vdf.getInitializer();
-				return cic.getType().toString();
+				return cic.getType().resolveBinding().getQualifiedName();
 			}
 			
 			//si non instancie
 			if(vdf.getParent() instanceof VariableDeclarationStatement){
 				VariableDeclarationStatement vds = (VariableDeclarationStatement)vdf.getParent();
-				return vds.getType().toString();
+				return vds.getType().resolveBinding().getQualifiedName();
 			}
 
 			
 		} else if (expr instanceof ClassInstanceCreation){
 			//si l'argument est directement "new Class()"
 			ClassInstanceCreation cic = (ClassInstanceCreation)expr;
-			return cic.getType().toString();
+			return cic.getType().resolveBinding().getQualifiedName();
 		} else if (expr instanceof ThisExpression){
 			File f = new File(path);
 			String name = f.getName();
@@ -124,11 +129,18 @@ public class RegisterServiceParser {
 		return "";
 	}
 	
-	public static void parse(String filepath, Map<String, VariableDeclarationFragment> varmap, List<MethodInvocation> invoclist, Map<String, String> assignmap){
+	public static void parse(String filepath, String classpath, Map<String, VariableDeclarationFragment> varmap, List<MethodInvocation> invoclist, Map<String, String> assignmap){
 		char[] source = convertFileIntoCharArray(filepath);
 
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
+	    String unitName = "Activator.java";
+		parser.setUnitName(unitName);
+	    String[] sources = {classpath};
+		String[] classpaths = {classpath};
+ 
+		parser.setEnvironment(classpaths, sources, new String[] { "UTF-8"}, true);
+
 	    parser.setSource(source);
 	    parser.setResolveBindings(true);
 	    CompilationUnit cu = (CompilationUnit) parser.createAST(null);

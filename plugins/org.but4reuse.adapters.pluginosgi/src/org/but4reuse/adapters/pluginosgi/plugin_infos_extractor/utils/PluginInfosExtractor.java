@@ -131,7 +131,7 @@ public class PluginInfosExtractor {
 			//parseBytecode(new File(path), pe.getServices());
 		}
 		
-		parseActivator(new File(PATH), plugin.getExport_packages(), "");
+		parseActivator(new File(PATH), plugin.getAbsolutePath(), plugin.getExport_packages(), "");
 		
 		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
@@ -185,17 +185,17 @@ public class PluginInfosExtractor {
 	}
 
 	
-	public static List<PackageElement> parseActivator(File f, List<PackageElement> lse, String packagename){
+	public static List<PackageElement> parseActivator(File f, String classpath, List<PackageElement> lse, String packagename){
 		//System.out.println(f.getAbsolutePath());
 		if(f.isDirectory()){
 			File[] listfiles = f.listFiles();
 			for(File tmpf: listfiles){
 				if(tmpf.isDirectory()){
-					parseActivator(tmpf, lse, packagename+(packagename==""?"":".")+tmpf.getName());
+					parseActivator(tmpf, classpath, lse, packagename+(packagename==""?"":".")+tmpf.getName());
 				}else if((tmpf.getName().contains("Activator") || tmpf.getName().contains("activator")) && tmpf.getName().contains(".java")){
 					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath()+"\t package name:"+packagename);
 					
-					List<ServiceElement> listServices = RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath());
+					List<ServiceElement> listServices = RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath(), classpath);
 					addPackagesServices(packagename, lse, listServices);
 					
 				}
