@@ -6,8 +6,10 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 
@@ -77,7 +79,9 @@ public class ASTVisitor extends org.eclipse.jdt.core.dom.ASTVisitor {
     		Expression right = node.getRightHandSide();
     		if(right instanceof ClassInstanceCreation){
     			ClassInstanceCreation cic = ((ClassInstanceCreation)right);
-    			assignmap.put(name, cic.getType().toString());
+    			Type t = cic.getType();
+    			ITypeBinding itb = t.resolveBinding();
+    			assignmap.put(name, itb!=null?itb.getQualifiedName():"");
     		}
     	}
     	return true;

@@ -36,12 +36,48 @@ public class RegisterServiceParser {
 			System.out.println("------ Fin de Activator"+i+".java -----");
 		}
 		*/
-		computeServiceElement("C:\\Users\\L-C\\Desktop\\org.eclipse.equinox.http.servlet.source_1.1.500.v20140318-1755\\org\\eclipse\\equinox\\http\\servlet\\internal\\Activator.java",
-				"C:\\Users\\L-C\\Desktop\\org.eclipse.equinox.http.servlet.source_1.1.500.v20140318-1755");
+		
+		
+		for(int i = 164; i < 400; i++){
+			String[] res = findActivatorAndClassPath("C:\\Users\\L-C\\Desktop\\activatortest", i);
+			
+			if(res[0] != ""){
+				System.out.println(res[1]+"  "+ i);
+				computeServiceElement(res[0], res[1]);
+				
+			}
+			
+		}
+		
+		
+
 	}
 	
 	
+	public static String[] findActivatorAndClassPath(String folder, int i){
+		String res[] = new String[2];
+		File f = new File(folder);
+		File cp = f.listFiles()[i];
+		res[1] = cp.getAbsolutePath();
+		res[0] = ActivatorPath(cp);
+		return res;
+		
+	}
 	
+	public static String ActivatorPath(File f){
+		if(f.isDirectory()){
+			File[] listfiles = f.listFiles();
+			for(File tmpf: listfiles){
+				if(tmpf.isDirectory()){
+					String res = ActivatorPath(tmpf);
+					if(res != "") return res;
+				}else if(tmpf.getName().contains("Activator.java")){
+					return tmpf.getAbsolutePath();
+				}
+			}
+		}
+		return "";
+	}
 	
 	public static List<ServiceElement> computeServiceElement(String filepath, String classpath){
 		Map<String, VariableDeclarationFragment> varmap = new HashMap<String, VariableDeclarationFragment>();
@@ -80,7 +116,9 @@ public class RegisterServiceParser {
 				return itb!=null?itb.getQualifiedName():"";
 			}
 		} else if (expr instanceof TypeLiteral && expr.toString().contains(".class")){
-			return expr.toString().substring(0, expr.toString().length()-6);
+			Type t = ((TypeLiteral)expr).getType();
+			ITypeBinding itb = t.resolveBinding();
+			return itb!=null?itb.getQualifiedName():"";
 		} else if (expr instanceof SimpleName){
 			String name = ((SimpleName)expr).getFullyQualifiedName();
 			if(varmap.containsKey(name)){
@@ -125,6 +163,11 @@ public class RegisterServiceParser {
 			File f = new File(path);
 			String name = f.getName();
 			return name.substring(0, name.length()-5);
+		} else if(expr instanceof MethodInvocation){
+			MethodInvocation mi = ((MethodInvocation)expr);	
+			return mi.resolveTypeBinding().getQualifiedName();
+
+			
 		}
 		return "";
 	}
