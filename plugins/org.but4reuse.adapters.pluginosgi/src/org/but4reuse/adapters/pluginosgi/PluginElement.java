@@ -33,8 +33,8 @@ public class PluginElement extends FileElement {
 	
 	
 	//PSTL ADD
-	private ArrayList<PackageElement> import_packages;
-	private ArrayList<PackageElement> export_packages;
+	private List<PackageElement> import_packages;
+	private List<PackageElement> export_packages;
 	private Map<String,String> services;
 	//private ISimilarity similarityStrategy = new AveragePluginElementStrategy();
 	private ISimilarity similarityStrategy = new OnOffControlPluginElementStrategy();
@@ -44,11 +44,11 @@ public class PluginElement extends FileElement {
 		return services;
 	}
 	
-	public ArrayList<PackageElement> getImport_packages(){
+	public List<PackageElement> getImport_packages(){
 		return import_packages;
 	}
 	
-	public ArrayList<PackageElement> getExport_packages(){
+	public List<PackageElement> getExport_packages(){
 		return export_packages;
 	}
 	

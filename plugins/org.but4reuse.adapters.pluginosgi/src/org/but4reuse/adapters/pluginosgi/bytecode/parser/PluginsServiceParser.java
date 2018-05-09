@@ -201,8 +201,8 @@ public class PluginsServiceParser {
 							lse.add(new ServiceElement("",convertService(inst.desc)));
 							break;
 						default: //System.out.println("# Type non trouvé pour "+ains.getOpcode()+" : "+ains.getClass()); 
-								throw new RuntimeException("Façon de passer un argument non prise en compte : "+
-									ains.getOpcode()+"\n Instruction de type "+ains.getClass());
+								/*throw new RuntimeException("Façon de passer un argument non prise en compte : "+
+									ains.getOpcode()+"\n Instruction de type "+ains.getClass());*/
 						
 						}
 					}

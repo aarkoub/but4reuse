@@ -23,14 +23,15 @@ import org.but4reuse.adapters.pluginosgi.bytecode.parser.PluginsServiceParser;
 import org.but4reuse.utils.files.FileUtils;
 
 public class PluginInfosExtractor {
-	static int cpt = 0;
 	public static final String BUNDLESINFO_RELATIVEPATH = "configuration/org.eclipse.equinox.simpleconfigurator/bundles.info";
 	private static final String BUNDLE_VERSION = "Bundle-Version";
 	private static final String BUNDLE_NAME = "Bundle-Name";
 	private static final String REQUIRE_BUNDLE = "Require-Bundle";
 	private static final String BUNDLE_SYMBOLIC_NAME = "Bundle-SymbolicName";
 	private static final String BUNDLE_LOCALIZATION = "Bundle-Localization";
-
+	private static final String BUNDLE_ACTIVATOR = "Bundle-Activator";
+	private static final boolean exhaustive = true;
+	
 	// as used in org.google.guava for example
 	private static final String DEFAULT_LOCALIZATION = "OSGI-INF/l10n/bundle";
 
@@ -113,6 +114,8 @@ public class PluginInfosExtractor {
 			}
 		}
 		
+		
+		//extraction du jar
 		boolean deleteDirectory = false;
 		
 		PATH = plugin.getAbsolutePath();
@@ -127,13 +130,41 @@ public class PluginInfosExtractor {
 			deleteDirectory = true;
 		}
 		
-		for(PackageElement pe: plugin.getExport_packages()){
-			String path = PATH+"\\"+pe.getName().replace(".", "\\");
-			//parseBytecode(new File(path), pe.getServices());
+		
+
+		String activatorbundle = attributes.getValue(BUNDLE_ACTIVATOR);
+		if(activatorbundle != null) {
+			String activators[] = activatorbundle.split(",\\s+|,");
+			for(String name: activators) {
+				String tm = PATH+File.separator+name.replace(".", File.separator)+".class";
+				System.out.println(tm);
+				File f = new File(tm);
+				if(f.exists()) {
+					List<ServiceElement> l = new ArrayList<>();
+					try {
+						PluginsServiceParser.parsePluginClass(new FileInputStream(f), l);
+						for(ServiceElement selts: l) {
+							addPackagesFromByteCode(selts, plugin.getExport_packages());
+						}
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		}
 		
-		parseActivator(new File(PATH), plugin.getAbsolutePath(), plugin.getExport_packages(), "");
 		
+		if(exhaustive) {
+			List<ServiceElement> l = new ArrayList<>();
+			parseActivator(new File(PATH), plugin.getAbsolutePath(), l);
+			for(ServiceElement selts: l) {
+				List<String> itfs = new ArrayList<>();
+				itfs.add(selts.getInterfaceName());
+				addPackagesFromActivatorParser(selts, plugin.getExport_packages());
+			}
+		}
 		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		
@@ -186,20 +217,16 @@ public class PluginInfosExtractor {
 	}
 
 	
-	public static List<PackageElement> parseActivator(File f, String classpath, List<PackageElement> lse, String packagename){
+	public static List<ServiceElement> parseActivator(File f, String classpath, List<ServiceElement> lse){
 		//System.out.println(f.getAbsolutePath());
 		if(f.isDirectory()){
 			File[] listfiles = f.listFiles();
 			for(File tmpf: listfiles){
 				if(tmpf.isDirectory()){
-					parseActivator(tmpf, classpath, lse, packagename+(packagename==""?"":".")+tmpf.getName());
+					parseActivator(tmpf, classpath, lse);
 				}else if((tmpf.getName().contains("Activator") || tmpf.getName().contains("activator")) && tmpf.getName().contains(".java")){
-					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath()+"\t package name:"+packagename);
-					
-					List<ServiceElement> listServices = RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath(), classpath);
-					addPackagesServices(packagename, lse, listServices);
-					cpt++;
-					System.out.println(cpt);
+					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath());
+					lse.addAll(RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath(), classpath));
 					
 				}
 			}
@@ -377,7 +404,7 @@ public class PluginInfosExtractor {
 		
 		List<List<String>> infos = new ArrayList<>();
 		
-		List<String> interfaceNames = new ArrayList<String>();
+		
 		
 		if(uri.charAt(0)!='/')
 			uri = '/'+uri;
@@ -443,6 +470,76 @@ public class PluginInfosExtractor {
 			p.addService(new ServiceElement(n, implClass));
 		}
 	}
+	
+	
+	private static void addPackagesFromByteCode(ServiceElement se, List<PackageElement> lpackages){
+		PackageElement p;
+		String n = se.getObjName();
+		String[] words = n.split("\\.");
+		
+		String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+		if((p=findPackage(packageName, lpackages))==null){
+			//System.out.println("Package name "+packageName);
+			
+			p = new PackageElement(packageName);
+			lpackages.add(p);
+		}
+		p.addService(se);
+	}
+	
+	private static void addPackagesFromActivatorParser(ServiceElement se, List<PackageElement> lpackages){
+		PackageElement p ;
+		if(se.getObjName().equals("")) {
+			String n = se.getInterfaceName();
+			
+			String[] words = n.split("\\.");
+			
+			String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+			
+			if((p=findPackage(packageName, lpackages))==null){
+				//System.out.println("Package name "+packageName);
+				
+				p = new PackageElement(packageName);
+				lpackages.add(p);
+			}
+			p.addService(se);
+			return;
+		}
+		if(se.getInterfaceName().equals("")) {
+			String n = se.getObjName();
+			
+			String[] words = n.split("\\.");
+			System.out.println(n);
+			String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+			
+			if((p=findPackage(packageName, lpackages))==null){
+				//System.out.println("Package name "+packageName);
+				
+				p = new PackageElement(packageName);
+				lpackages.add(p);
+			}
+			p.addService(se);
+			return;
+		}
+		String n = se.getInterfaceName();
+		
+		String[] words = n.split("\\.");
+		
+		String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+
+		//System.out.println("Interface name "+n);
+		
+		if((p=findPackage(packageName, lpackages))==null){
+			//System.out.println("Package name "+packageName);
+			
+			p = new PackageElement(packageName);
+			lpackages.add(p);
+		}
+		p.addService(se);
+		
+	}
+	
+	
 	
 	/**
 	 * Add a list of services to the package referenced by its name, making sure that the package nor the service already exists

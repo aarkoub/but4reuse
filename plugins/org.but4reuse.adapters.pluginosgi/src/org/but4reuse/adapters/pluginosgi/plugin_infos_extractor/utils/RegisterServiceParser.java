@@ -94,7 +94,9 @@ public class RegisterServiceParser {
 			String itf = findInterface(args.get(0), varmap);
 			String obj = findObj(args.get(1), varmap, assignmap, filepath);
 			System.out.println("SERVICE: itf: "+itf+"\t obj: "+obj);
-			servelts.add(new ServiceElement(itf, obj));
+			if(!itf.equals("") || !obj.equals("")) {
+				servelts.add(new ServiceElement(itf, obj));
+			}
 			
 		}
 		
@@ -166,9 +168,8 @@ public class RegisterServiceParser {
 			ITypeBinding itb = t.resolveBinding();
 			return itb!=null?itb.getQualifiedName():"";
 		} else if (expr instanceof ThisExpression){
-			File f = new File(path);
-			String name = f.getName();
-			return name.substring(0, name.length()-5);
+			ITypeBinding itb = ((ThisExpression)expr).resolveTypeBinding();
+			return itb!=null?itb.getQualifiedName():"";
 		} else if(expr instanceof MethodInvocation){
 			MethodInvocation mi = ((MethodInvocation)expr);	
 			ITypeBinding itb = mi.resolveTypeBinding();;
