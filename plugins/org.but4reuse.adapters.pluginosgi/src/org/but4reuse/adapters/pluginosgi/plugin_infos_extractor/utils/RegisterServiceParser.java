@@ -145,27 +145,34 @@ public class RegisterServiceParser {
 
 			if(vdf.getInitializer() instanceof ClassInstanceCreation){
 				ClassInstanceCreation cic = (ClassInstanceCreation)vdf.getInitializer();
-				return cic.getType().resolveBinding().getQualifiedName();
+				Type t = cic.getType();
+				ITypeBinding itb = t.resolveBinding();
+				return itb!=null?itb.getQualifiedName():"";
 			}
 			
 			//si non instancie
 			if(vdf.getParent() instanceof VariableDeclarationStatement){
 				VariableDeclarationStatement vds = (VariableDeclarationStatement)vdf.getParent();
-				return vds.getType().resolveBinding().getQualifiedName();
+				Type t = vds.getType();
+				ITypeBinding itb = t.resolveBinding();
+				return itb!=null?itb.getQualifiedName():"";
 			}
 
 			
 		} else if (expr instanceof ClassInstanceCreation){
 			//si l'argument est directement "new Class()"
 			ClassInstanceCreation cic = (ClassInstanceCreation)expr;
-			return cic.getType().resolveBinding().getQualifiedName();
+			Type t = cic.getType();
+			ITypeBinding itb = t.resolveBinding();
+			return itb!=null?itb.getQualifiedName():"";
 		} else if (expr instanceof ThisExpression){
 			File f = new File(path);
 			String name = f.getName();
 			return name.substring(0, name.length()-5);
 		} else if(expr instanceof MethodInvocation){
 			MethodInvocation mi = ((MethodInvocation)expr);	
-			return mi.resolveTypeBinding().getQualifiedName();
+			ITypeBinding itb = mi.resolveTypeBinding();;
+			return itb!=null?itb.getQualifiedName():"";
 
 			
 		}

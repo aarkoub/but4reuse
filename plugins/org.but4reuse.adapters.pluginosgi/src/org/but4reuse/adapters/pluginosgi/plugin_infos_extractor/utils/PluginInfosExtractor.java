@@ -23,6 +23,7 @@ import org.but4reuse.adapters.pluginosgi.bytecode.parser.PluginsServiceParser;
 import org.but4reuse.utils.files.FileUtils;
 
 public class PluginInfosExtractor {
+	static int cpt = 0;
 	public static final String BUNDLESINFO_RELATIVEPATH = "configuration/org.eclipse.equinox.simpleconfigurator/bundles.info";
 	private static final String BUNDLE_VERSION = "Bundle-Version";
 	private static final String BUNDLE_NAME = "Bundle-Name";
@@ -197,6 +198,8 @@ public class PluginInfosExtractor {
 					
 					List<ServiceElement> listServices = RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath(), classpath);
 					addPackagesServices(packagename, lse, listServices);
+					cpt++;
+					System.out.println(cpt);
 					
 				}
 			}
