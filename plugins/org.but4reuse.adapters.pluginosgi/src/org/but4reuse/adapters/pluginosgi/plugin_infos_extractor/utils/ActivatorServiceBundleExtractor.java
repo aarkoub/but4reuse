@@ -11,7 +11,8 @@ import java.util.Map;
 import org.but4reuse.adapters.pluginosgi.PluginElement;
 
 public class ActivatorServiceBundleExtractor {
-	
+	//ANCIEN PARSER D'ACTIVATOR UTILISANT UN STREAM DE STRING ET PARSANT LES STRING
+	//A NE PLUS CONSIDERER AU PROFIT D'UN PARSER QUI UTILISE JAVA JDT ET EST PLUS PERFORMANT
 	
 	public static boolean findActivatorServiceFile(File rep, List<File> toAnalyze){
 		//System.out.println("Seek Activator in: "+rep.getAbsolutePath());
@@ -158,6 +159,7 @@ public class ActivatorServiceBundleExtractor {
 			
 			String s = "";
 			try {
+				@SuppressWarnings("resource")
 				FileReader fr = new FileReader(file);
 				br = new BufferedReader(fr);
 				while( (s = br.readLine())!=null){

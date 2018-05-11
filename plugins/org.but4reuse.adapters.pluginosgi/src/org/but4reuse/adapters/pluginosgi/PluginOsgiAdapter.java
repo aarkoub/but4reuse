@@ -11,10 +11,8 @@ import java.util.Map;
 
 import org.but4reuse.adapters.IAdapter;
 import org.but4reuse.adapters.IElement;
-import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.ActivatorServiceBundleExtractor;
 import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.DependenciesBuilder;
 import org.but4reuse.adapters.pluginosgi.plugin_infos_extractor.utils.PluginInfosExtractor;
-import org.but4reuse.adapters.pluginosgi.uml.UML;
 import org.but4reuse.utils.files.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 

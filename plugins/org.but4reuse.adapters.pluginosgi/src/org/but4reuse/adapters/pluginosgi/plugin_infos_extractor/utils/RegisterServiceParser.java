@@ -183,6 +183,7 @@ public class RegisterServiceParser {
 	public static void parse(String filepath, String classpath, Map<String, VariableDeclarationFragment> varmap, List<MethodInvocation> invoclist, Map<String, String> assignmap){
 		char[] source = convertFileIntoCharArray(filepath);
 
+		@SuppressWarnings("deprecation")
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
 	    String unitName = "Activator.java";

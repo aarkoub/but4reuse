@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -29,8 +30,7 @@ public class PluginInfosExtractor {
 	private static final String REQUIRE_BUNDLE = "Require-Bundle";
 	private static final String BUNDLE_SYMBOLIC_NAME = "Bundle-SymbolicName";
 	private static final String BUNDLE_LOCALIZATION = "Bundle-Localization";
-	private static final String BUNDLE_ACTIVATOR = "Bundle-Activator";
-	private static final boolean exhaustive = true;
+	
 	
 	// as used in org.google.guava for example
 	private static final String DEFAULT_LOCALIZATION = "OSGI-INF/l10n/bundle";
@@ -44,7 +44,9 @@ public class PluginInfosExtractor {
 	private static final String IMPORT_PACKAGE = "Import-Package";
 	private static final String EXPORT_PACKAGE = "Export-Package";
 	private static final String SERVICE_COMPONENT=  "Service-Component";
-	
+	private static final String BUNDLE_ACTIVATOR = "Bundle-Activator";
+	private static final boolean exhaustive = true;
+	private static int nbservices = 0;
 	private static String PATH = null;
 	
 	
@@ -124,7 +126,6 @@ public class PluginInfosExtractor {
 				ZipExtractor.unZipAll(new File(PATH), new File(PATH.substring(0, PATH.length()-4)));
 				PATH = PATH.substring(0, PATH.length()-4);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			deleteDirectory = true;
@@ -137,12 +138,13 @@ public class PluginInfosExtractor {
 			String activators[] = activatorbundle.split(",\\s+|,");
 			for(String name: activators) {
 				String tm = PATH+File.separator+name.replace(".", File.separator)+".class";
-				System.out.println(tm);
+				System.out.println("BUNDLE-ACTIVATOR: "+tm);
 				File f = new File(tm);
 				if(f.exists()) {
 					List<ServiceElement> l = new ArrayList<>();
 					try {
 						PluginsServiceParser.parsePluginClass(new FileInputStream(f), l);
+						nbservices += l.size();
 						for(ServiceElement selts: l) {
 							addPackagesFromByteCode(selts, plugin.getExport_packages());
 						}
@@ -159,13 +161,14 @@ public class PluginInfosExtractor {
 		if(exhaustive) {
 			List<ServiceElement> l = new ArrayList<>();
 			parseActivator(new File(PATH), plugin.getAbsolutePath(), l);
+			nbservices += l.size();
 			for(ServiceElement selts: l) {
 				List<String> itfs = new ArrayList<>();
 				itfs.add(selts.getInterfaceName());
 				addPackagesFromActivatorParser(selts, plugin.getExport_packages());
 			}
 		}
-		
+		System.out.println("NB SERVICE:"+nbservices);
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		
 		if(service_component != null){
@@ -217,6 +220,8 @@ public class PluginInfosExtractor {
 	}
 
 	
+	
+	
 	public static List<ServiceElement> parseActivator(File f, String classpath, List<ServiceElement> lse){
 		//System.out.println(f.getAbsolutePath());
 		if(f.isDirectory()){
@@ -224,7 +229,7 @@ public class PluginInfosExtractor {
 			for(File tmpf: listfiles){
 				if(tmpf.isDirectory()){
 					parseActivator(tmpf, classpath, lse);
-				}else if((tmpf.getName().contains("Activator") || tmpf.getName().contains("activator")) && tmpf.getName().contains(".java")){
+				}else if(existRegisterParser(tmpf.getAbsolutePath()) && tmpf.getName().contains(".java")){
 					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath());
 					lse.addAll(RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath(), classpath));
 					
@@ -234,6 +239,36 @@ public class PluginInfosExtractor {
 		return lse;
 	}
 	
+	/**
+	 * Find if a file contains an invocation of registerService
+	 * @param file Path of the file
+	 * @return true if contains registerService/ false otherwise
+	 */
+	public static boolean existRegisterParser(String file) {
+		Scanner sc = null;
+		try {
+			sc = new Scanner(new File(file));
+			String currentLine = "";
+			while(sc.hasNextLine()){
+				currentLine = sc.nextLine();
+				if(currentLine.contains("registerService")) return true;
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			sc.close();
+		}
+		
+		return false;
+		
+	}
+	
+	/**
+	 * Browse all the file of the current file and apply the bytecode parser to .class file
+	 * @param f the current file
+	 * @param lse list of services found
+	 * @return list of services found
+	 */
 	public static List<ServiceElement> parseBytecode(File f, List<ServiceElement> lse){
 		if(f.isDirectory()){
 			File[] listfiles = f.listFiles();
@@ -507,9 +542,7 @@ public class PluginInfosExtractor {
 		}
 		if(se.getInterfaceName().equals("")) {
 			String n = se.getObjName();
-			
 			String[] words = n.split("\\.");
-			System.out.println(n);
 			String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
 			
 			if((p=findPackage(packageName, lpackages))==null){
