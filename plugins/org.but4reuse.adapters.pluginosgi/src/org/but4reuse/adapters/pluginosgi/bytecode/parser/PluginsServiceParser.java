@@ -90,6 +90,8 @@ public class PluginsServiceParser {
 						
 						//System.out.println("\t Operation precedente, correspondant au 2eme argument passe (instruction "+(i-4)+") :"+ ains.getOpcode());
 						//System.out.println("\t Type du service enregistre : ");
+						String object = "";
+						String itf = "";
 						switch(ains.getOpcode()) {						
 						case -1 :
 						case 1 :
@@ -101,7 +103,7 @@ public class PluginsServiceParser {
 								for(LocalVariableNode lvar : lvars) {
 									if(lvar.index == ins.var) {
 										//System.out.println("\t Local Variable/Param Type : "+lvar.desc);
-										lse.add(new ServiceElement("",convertService(lvar.desc)));
+										object = convertService(lvar.desc);
 										found = true;
 										break;
 									}
@@ -113,7 +115,7 @@ public class PluginsServiceParser {
 								if(ains.getOpcode() == 182 || ains.getOpcode() == 184 || ains.getOpcode() == 185) {
 									MethodInsnNode insm = (MethodInsnNode)ains;
 									System.out.println("\t Method/Constructor Returned Object Type : "+insm.desc);
-									lse.add(new ServiceElement("",convertService(insm.desc)));
+									object = convertService(insm.desc);
 									break;
 								}								
 							}
@@ -121,7 +123,7 @@ public class PluginsServiceParser {
 						case 18 : // LDC (Load Constant)
 							LdcInsnNode lins = (LdcInsnNode)ains;							
 							//System.out.println("\t Constant Type : "+lins.cst);
-							lse.add(new ServiceElement("",convertService(lins.cst.toString())));
+							object = convertService(lins.cst.toString());
 							break;							
 						case 25 : // Accès à une variable locale ou bien un paramètre : VarInsnNode
 							VarInsnNode ins = (VarInsnNode)ains;
@@ -130,7 +132,7 @@ public class PluginsServiceParser {
 							for(LocalVariableNode lvar : lvars) {
 								if(lvar.index == ins.var) {
 									//System.out.println("\t Local Variable/Param Type : "+lvar.desc);
-									lse.add(new ServiceElement("",convertService(lvar.desc)));
+									object = convertService(lvar.desc);
 									found = true;
 									break;
 								}
@@ -145,7 +147,7 @@ public class PluginsServiceParser {
 								if(insm.name.equals("<init>")) { // Appel de constructeur
 									TypeInsnNode inst = (TypeInsnNode)(insm.getPrevious().getPrevious()); // En cas d'instanciation avec new, il faut remonter deux instructions plus haut pour retrouver l'expression de Type utilisée
 									//System.out.println("\t Instantiation Type : "+inst.desc);
-									lse.add(new ServiceElement("",convertService(inst.desc)));
+									object = convertService(inst.desc);
 									break;
 								}
 							}			
@@ -157,7 +159,7 @@ public class PluginsServiceParser {
 									for(LocalVariableNode lvar : lvars) {
 										if(lvar.index == ins.var) {
 											//System.out.println("\t Local Variable/Param Type : "+lvar.desc);
-											lse.add(new ServiceElement("",convertService(lvar.desc)));
+											object = convertService(lvar.desc);
 											found = true;
 											break;
 										}
@@ -174,7 +176,7 @@ public class PluginsServiceParser {
 							if(ains instanceof FieldInsnNode){
 								FieldInsnNode insf = (FieldInsnNode)ains;
 								//System.out.println("\t Field Type : "+insf.desc);
-								lse.add(new ServiceElement("",convertService(insf.desc)));
+								object = convertService(insf.desc);
 							}
 							
 							break;
@@ -184,7 +186,7 @@ public class PluginsServiceParser {
 							if(insm.name.equals("<init>")) { // Appel de constructeur
 								TypeInsnNode inst = (TypeInsnNode)(insm.getPrevious().getPrevious()); // En cas d'instanciation avec new, il faut remonter deux instructions plus haut pour retrouver l'expression de Type utilisée
 								//System.out.println("\t Instantiation Type : "+inst.desc);
-								lse.add(new ServiceElement("",convertService(inst.desc)));
+								object = convertService(inst.desc);
 								break;
 							}							
 						case 182: // Invocation de méthode : MethodInsnNode
@@ -192,18 +194,42 @@ public class PluginsServiceParser {
 						case 185: // Invocation de méthode d'interface : MethodInsnNode
 							insm = (MethodInsnNode)ains;
 							//System.out.println("\t Method/Constructor Returned Object Type : "+insm.desc);
-							lse.add(new ServiceElement("",convertService(insm.desc)));
+							object = convertService(insm.desc);
 							break;
 						case 192: // Cast de type
 						case 187: // Instanciation de type
 							TypeInsnNode inst = (TypeInsnNode)ains;
 							//System.out.println("\t Instantiation Type : "+inst.desc);
-							lse.add(new ServiceElement("",convertService(inst.desc)));
+							object = convertService(inst.desc);
 							break;
 						default: //System.out.println("# Type non trouvé pour "+ains.getOpcode()+" : "+ains.getClass()); 
 								/*throw new RuntimeException("Façon de passer un argument non prise en compte : "+
 									ains.getOpcode()+"\n Instruction de type "+ains.getClass());*/
 						
+						}
+						
+						if(i-8 < 0) continue;
+						ains = instructions.get(i-8);
+
+						switch(ains.getOpcode()) {
+						case 182:
+							MethodInsnNode insm = (MethodInsnNode)ains;
+							if(insm.getPrevious() instanceof LdcInsnNode) {
+								LdcInsnNode inst = (LdcInsnNode)(insm.getPrevious());
+								itf = convertService(inst.cst.toString());
+							}
+							
+							break;
+						case 18:
+							LdcInsnNode lins = (LdcInsnNode)ains;
+							itf = convertService(lins.cst.toString());
+							break;
+							
+						}
+						
+						if(itf != "" && object != ""){
+							lse.add(new ServiceElement(itf, object));
+							//System.out.println("ITF: "+itf+" OBJ: "+object);
 						}
 					}
 				}
