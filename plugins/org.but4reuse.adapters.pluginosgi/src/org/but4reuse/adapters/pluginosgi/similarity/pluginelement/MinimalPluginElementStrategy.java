@@ -14,7 +14,13 @@ public class MinimalPluginElementStrategy implements ISimilarity {
 			PluginElement currentplugin = (PluginElement)currentElement;
 			PluginElement anotherplugin = (PluginElement)anotherElement;
 			
+			// Same symbolic name
+			if (currentplugin.getSymbName().equals(anotherplugin.getSymbName())) {
+					return 1;
+			}
+			
 			for(PackageElement pe: currentplugin.getExport_packages()){
+				
 				pe.setSimilarityStrategy(new MinimalPackageElementStrategy());
 				for(PackageElement pee: anotherplugin.getExport_packages()){
 					pee.setSimilarityStrategy(new MinimalPackageElementStrategy());

@@ -17,6 +17,7 @@ public class OnOffControlPluginElementStrategy implements ISimilarity {
 		if(currentElement instanceof PluginElement && anotherElement instanceof PluginElement){
 			PluginElement current = (PluginElement)currentElement;
 			PluginElement another = (PluginElement)anotherElement;
+			
 			if(current.getSymbName().equals(another.getSymbName())) return 1;
 			
 			List<PackageElement> lsec = new ArrayList<>(current.getImport_packages());
