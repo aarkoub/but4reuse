@@ -168,7 +168,8 @@ public class PluginInfosExtractor {
 				addPackagesFromActivatorParser(selts, plugin.getExport_packages());
 			}
 		}
-		System.out.println("NB SERVICE:"+nbservices);
+		//System.out.println("NB SERVICE:"+nbservices);
+		
 		String service_component = attributes.getValue(SERVICE_COMPONENT);
 		
 		if(service_component != null){
@@ -230,7 +231,7 @@ public class PluginInfosExtractor {
 				if(tmpf.isDirectory()){
 					parseActivator(tmpf, classpath, lse);
 				}else if(existRegisterParser(tmpf.getAbsolutePath()) && tmpf.getName().contains(".java")){
-					System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath());
+					//System.out.println("ACTIVATOR TROUVE "+tmpf.getAbsolutePath());
 					lse.addAll(RegisterServiceParser.computeServiceElement(tmpf.getAbsolutePath(), classpath));
 					
 				}
@@ -519,93 +520,59 @@ public class PluginInfosExtractor {
 			p = new PackageElement(packageName);
 			lpackages.add(p);
 		}
+		
 		p.addService(se);
+		
 	}
+	
 	
 	private static void addPackagesFromActivatorParser(ServiceElement se, List<PackageElement> lpackages){
 		PackageElement p ;
+		
+		String packageName;
+		
 		if(se.getObjName().equals("")) {
 			String n = se.getInterfaceName();
 			
 			String[] words = n.split("\\.");
+			if(words.length<=1)
+				return;
+			packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
 			
-			String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
-			
-			if((p=findPackage(packageName, lpackages))==null){
-				//System.out.println("Package name "+packageName);
-				
-				p = new PackageElement(packageName);
-				lpackages.add(p);
-			}
-			p.addService(se);
-			return;
 		}
-		if(se.getInterfaceName().equals("")) {
-			String n = se.getObjName();
-			String[] words = n.split("\\.");
-			String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
-			
-			if((p=findPackage(packageName, lpackages))==null){
-				//System.out.println("Package name "+packageName);
+		else{
+			if(se.getInterfaceName().equals("")) {
+				String n = se.getObjName();
+				String[] words = n.split("\\.");
+				if(words.length<=1)
+					return;
+				packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
 				
-				p = new PackageElement(packageName);
-				lpackages.add(p);
 			}
-			p.addService(se);
-			return;
-		}
-		String n = se.getInterfaceName();
-		
-		String[] words = n.split("\\.");
-		
-		String packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+			else{
 
-		//System.out.println("Interface name "+n);
+				String n = se.getInterfaceName();
+				
+				String[] words = n.split("\\.");
+				if(words.length<=1)
+					return;
+				packageName = n.substring(0, n.length()- words[words.length-1].length()-1);
+			}
+			
+		}
 		
+
 		if((p=findPackage(packageName, lpackages))==null){
 			//System.out.println("Package name "+packageName);
 			
 			p = new PackageElement(packageName);
 			lpackages.add(p);
 		}
+		
 		p.addService(se);
-		
-	}
-	
-	
-	
-	/**
-	 * Add a list of services to the package referenced by its name, making sure that the package nor the service already exists
-	 * @param packageName the name of the package
-	 * @param lpackages the list of the packages where it is to be added
-	 * @param lservices the list of services to add to the package
-	 */
-	private static void addPackagesServices(String packageName, List<PackageElement> lpackages, List<ServiceElement> lservices){
-		
-		PackageElement p;
-		
-		if((p=findPackage(packageName, lpackages))==null){
-			
-			p = new PackageElement(packageName);
-			lpackages.add(p);
-		}
-		
-		for(ServiceElement servToAdd : lservices){
-			boolean needToAdd = true;
-			for(ServiceElement serv : p.getServices()){
-				if(servToAdd.equals(serv)){
-					needToAdd = false;
-					break;
-				}
-			}
-			
-			if(needToAdd){
-				p.getServices().add(servToAdd);
-				System.out.println("Ajout du service "+servToAdd.getInterfaceName()+" dans "+p.getName());
-			}
-			
-		}
 
 	}
+	
+	
 	
 }

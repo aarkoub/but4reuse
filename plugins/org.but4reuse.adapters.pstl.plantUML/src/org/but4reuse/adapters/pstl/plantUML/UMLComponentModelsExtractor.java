@@ -3,6 +3,7 @@ package org.but4reuse.adapters.pstl.plantUML;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.but4reuse.adaptedmodel.AdaptedModel;
@@ -29,6 +30,7 @@ public class UMLComponentModelsExtractor {
 
 			List<IElement> elements ;
 			List<Block> blocks = adaptedModel.getOwnedBlocks();
+			List<List<IElement>> blockList = new ArrayList<>();
 			
 			try {
 				URI uri = new URI(constructionURI);
@@ -40,14 +42,18 @@ public class UMLComponentModelsExtractor {
 			
 			
 			File directory = new File(constructionURI);
-			directory.mkdirs();
 			
-			for(String f : directory.list()){
-				ZipExtractor.deleteDirectory(new File(directory.getPath(), f));
+			if(directory.list()!=null){
+				for(String f : directory.list()){
+					ZipExtractor.deleteDirectory(new File(directory.getPath(), f));
+				}
 			}
-			 
+			directory.mkdirs();
 			for(int i=0; i<blocks.size(); i++){
 				elements = AdaptedModelHelper.getElementsOfBlock(blocks.get(i));
+				
+				blockList.add(elements);
+				
 				List<List<IElement>> sortedElements = UML.sortElementsByPackageName(elements, nbLevel);
 				
 				for(List<IElement> listElements : sortedElements){
@@ -73,7 +79,7 @@ public class UMLComponentModelsExtractor {
 			}
 			
 			
-			
+			UML.generateUmlBlocks(blockList, constructionURI+"/diagramBlocks", constructionURI+"/diagramBlocks");
 			
 			/*elements = AdaptedModelHelper.getElementsOfBlock(blocks.get(1));
 			Map<IElement, ElementWrapper> ieewMap = AdaptedModelHelper.createMapIEEW(adaptedModel);

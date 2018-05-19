@@ -64,6 +64,9 @@ public class ServiceElement extends FileElement {
 		if(o==null) return false;
 		if(o==this) return true;
 		if(!(o instanceof ServiceElement)) return false;
+		if(this.interfaceName==""){
+			return this.objName.equals( ((ServiceElement) o).objName);
+		}
 		return this.interfaceName.equals( ((ServiceElement) o).interfaceName);
 	}
 

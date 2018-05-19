@@ -17,12 +17,13 @@ import net.sourceforge.plantuml.SourceStringReader;
 public class UML {
 	
 	private static FileWriter writer;
+	private static String [] tag = {"up", "left", "down" , "right"};
 
 
 	private static String makeUMLDiagram(List<IElement> elements, String destPath){
 		
 		StringBuilder sb = new StringBuilder();
-		
+		int k=0;
 		try {
 			writer = new FileWriter(new File(destPath));
 			writer.write("@startuml\n\n");
@@ -51,8 +52,9 @@ public class UML {
 						for(ServiceElement serv : packElem.getServices()){	
 							if(!serv.isInterface()) continue;
 							noServices = false;
-							writer.write(serv.getInterfaceName()+" <- ["+plugElem.getName()+"]\n");
-							sb.append(serv.getInterfaceName()+" <- ["+plugElem.getName()+"]\n");
+							writer.write(serv.getInterfaceName()+" <- "+tag[k]+"- ["+plugElem.getName()+"]\n");
+							sb.append(serv.getInterfaceName()+" <- ["+tag[k]+"-"+plugElem.getName()+"]\n");
+							k=(k+1)%4;
 						}
 					}
 					
@@ -121,7 +123,7 @@ public class UML {
 			if(elements.get(i) instanceof PluginElement){
 				PluginElement plugin = (PluginElement) elements.get(i);
 				nb++;
-				elementsToConsider.add(elements.get(i));	
+				elementsToConsider.add(plugin);	
 				
 			}
 			
@@ -180,6 +182,109 @@ public class UML {
 		}
 		
 		return sortedElements;
+	}
+	
+	
+	public static void generateUmlBlocks(List<List<IElement>> blocks, String source, String pngDestination){
+		
+		String content = makeUMLBlockDiagram(blocks, source+".txt");
+
+		SourceStringReader reader = new SourceStringReader(content);
+		
+		// Write the first image to "png"
+		File pngFile = new File(pngDestination+"png");
+		try {
+			reader.outputImage(pngFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+	public static String makeUMLBlockDiagram(List<List<IElement>> blocks, String destPath){
+		
+		StringBuilder sb = new StringBuilder();
+		
+		int i=0;
+		int k=0;
+		
+		try {
+			writer = new FileWriter(new File(destPath));
+			writer.write("@startuml\n\n");
+			sb.append("@startuml\n\n");
+			for(List<IElement> block : blocks){
+				List<String> requiredInterfaces = new ArrayList<>();
+				List<String> providedInterfaces = new ArrayList<>();
+				getRequiredInterfacesNames(block, requiredInterfaces, providedInterfaces);
+				
+				for(String req : requiredInterfaces){
+
+					writer.write(req+" <-"+tag[k]+"- [ Block "+i+"]\n");
+					sb.append(req+" <-"+tag[k]+"- [ Block "+i+"]\n");
+					k=(k+1)%4;
+				}
+				
+				for(String pro : providedInterfaces){
+					writer.write("[ Block "+i+"]<-"+tag[k]+"- "+pro+"\n");
+					sb.append("[ Block "+i+"]<-"+tag[k]+"- "+pro+"\n");
+				}
+				
+				if(requiredInterfaces.size()==0 && providedInterfaces.size()==0){
+					writer.write("[ Block "+i+"]\n");
+					sb.append("[ Block "+i+"]\n");
+				}
+				i++;
+				
+				
+			}
+			writer.write("\n@enduml");
+			sb.append("\n@enduml");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally{
+			try {
+				writer.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return sb.toString();
+	}
+
+
+	private static void getRequiredInterfacesNames(List<IElement> block, List<String> requiredInterfaces, List<String> providedInterfaces) {
+		
+		for(IElement elem : block){
+			if(elem instanceof PluginElement){
+				PluginElement plugElem = (PluginElement) elem;
+				
+				for(PackageElement packElem : plugElem.getExport_packages()){
+					
+					for(ServiceElement serv : packElem.getServices()){
+						if(!serv.isInterface()) continue;
+						providedInterfaces.add(serv.getInterfaceName());
+					}
+				}
+				
+				for(PackageElement packElem : plugElem.getImport_packages()){
+					
+					for(ServiceElement serv : packElem.getServices()){	
+						if(!serv.isInterface()) continue;
+						requiredInterfaces.add(serv.getInterfaceName());
+					}
+				}
+					
+				
+			}
+			
+		}
+		
 	}
 	
 }
