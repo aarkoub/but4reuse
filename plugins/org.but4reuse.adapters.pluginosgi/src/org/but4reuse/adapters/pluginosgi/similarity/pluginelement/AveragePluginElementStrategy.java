@@ -50,7 +50,7 @@ public class AveragePluginElementStrategy implements ISimilarity {
 				}
 				if(quotient==0)
 					return 0;
-				
+				System.out.println(quotient/i);
 				return quotient / i;
 			}
 		}
