@@ -217,7 +217,7 @@ public class PluginsServiceParser {
 	public static String convertService(String name){
 		String service = name.replace("/", ".").replace("(", "").replace(")","").replace(";","").replace("[", "");
 		service = service.charAt(0)=='L'?service.substring(1):service;
-		System.out.println("Service bytecode: "+service);
+		//System.out.println("Service bytecode: "+service);
 		return service;
 	}
 }

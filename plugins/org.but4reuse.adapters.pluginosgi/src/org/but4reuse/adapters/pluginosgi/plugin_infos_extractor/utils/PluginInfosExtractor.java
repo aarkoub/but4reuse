@@ -21,6 +21,9 @@ import org.but4reuse.adapters.pluginosgi.PackageElement;
 import org.but4reuse.adapters.pluginosgi.PluginElement;
 import org.but4reuse.adapters.pluginosgi.ServiceElement;
 import org.but4reuse.adapters.pluginosgi.bytecode.parser.PluginsServiceParser;
+import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
+import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.AveragePluginElementStrategy;
+import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.MinimalPluginElementStrategy;
 import org.but4reuse.utils.files.FileUtils;
 
 public class PluginInfosExtractor {
@@ -48,6 +51,8 @@ public class PluginInfosExtractor {
 	private static final boolean exhaustive = true;
 	private static int nbservices = 0;
 	private static String PATH = null;
+
+	private static ISimilarity strategy = new MinimalPluginElementStrategy();
 	
 	
 	
@@ -137,8 +142,10 @@ public class PluginInfosExtractor {
 		if(activatorbundle != null) {
 			String activators[] = activatorbundle.split(",\\s+|,");
 			for(String name: activators) {
+				
 				String tm = PATH+File.separator+name.replace(".", File.separator)+".class";
-				System.out.println("BUNDLE-ACTIVATOR: "+tm);
+				//System.out.println("BUNDLE-ACTIVATOR: "+tm);
+				
 				File f = new File(tm);
 				if(f.exists()) {
 					List<ServiceElement> l = new ArrayList<>();
@@ -303,7 +310,13 @@ public class PluginInfosExtractor {
 	 * @throws FileNotFoundException
 	 */
 	public static PluginElement getPluginInfosFromManifest(String manifestFile) {
+		
 		PluginElement plugin = new PluginElement();
+		
+		//setting the strategy we want
+		plugin.setSimilarityStrategy(strategy);
+		
+		
 		plugin.setJar(false);
 		File f = new File(manifestFile);
 		f = f.getParentFile().getParentFile();
@@ -346,6 +359,10 @@ public class PluginInfosExtractor {
 	 */
 	public static PluginElement getPluginInfosFromJar(String jarFile) {
 		PluginElement plugin = new PluginElement();
+		
+		//setting the strategy we want
+		plugin.setSimilarityStrategy(strategy);
+		
 		plugin.setJar(true);
 		plugin.setAbsolutePath(jarFile);
 		try {

@@ -19,11 +19,12 @@ public class AveragePackageElementStrategy implements ISimilarity {
 			
 			if(!currentPackageElement.getName().equals(anotherPackageElement.getName()))
 				return 0;
-			
+			System.out.println(sum);
 			for(ServiceElement serv : currentPackageElement.getServices()){
 				
 				for(ServiceElement serv2 : anotherPackageElement.getServices()){
 					sum += serv.similarity(serv2);
+					
 				}
 			}
 			if(sum==0)

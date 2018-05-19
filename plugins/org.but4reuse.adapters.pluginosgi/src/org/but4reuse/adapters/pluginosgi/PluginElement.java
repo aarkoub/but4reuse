@@ -7,7 +7,9 @@ import java.util.Map;
 
 import org.but4reuse.adapters.IElement;
 import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
+import org.but4reuse.adapters.pluginosgi.similarity.packageelement.MinimalPackageElementStrategy;
 import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.AveragePluginElementStrategy;
+import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.MinimalPluginElementStrategy;
 import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.OnOffControlPluginElementStrategy;
 import org.but4reuse.utils.strings.StringUtils;
 
@@ -36,8 +38,7 @@ public class PluginElement extends FileElement {
 	private List<PackageElement> import_packages;
 	private List<PackageElement> export_packages;
 	private Map<String,String> services;
-	//private ISimilarity similarityStrategy = new AveragePluginElementStrategy();
-	private ISimilarity similarityStrategy = new OnOffControlPluginElementStrategy();
+	private ISimilarity similarityStrategy = new MinimalPluginElementStrategy();
 	
 	
 	public Map<String,String> getServices(){

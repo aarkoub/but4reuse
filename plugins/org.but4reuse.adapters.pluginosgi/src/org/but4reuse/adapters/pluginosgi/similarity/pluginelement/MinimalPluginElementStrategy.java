@@ -22,7 +22,9 @@ public class MinimalPluginElementStrategy implements ISimilarity {
 			for(PackageElement pe: currentplugin.getExport_packages()){
 				
 				pe.setSimilarityStrategy(new MinimalPackageElementStrategy());
+				
 				for(PackageElement pee: anotherplugin.getExport_packages()){
+					
 					pee.setSimilarityStrategy(new MinimalPackageElementStrategy());
 					if(pe.similarity(pee) == 1){
 						return 1;

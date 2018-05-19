@@ -227,8 +227,8 @@ public class UML {
 				}
 				
 				for(String pro : providedInterfaces){
-					writer.write("[ Block "+i+"]<-"+tag[k]+"- "+pro+"\n");
-					sb.append("[ Block "+i+"]<-"+tag[k]+"- "+pro+"\n");
+					writer.write("[ Block "+i+"] - "+pro+"\n");
+					sb.append("[ Block "+i+"] - "+pro+"\n");
 				}
 				
 				if(requiredInterfaces.size()==0 && providedInterfaces.size()==0){

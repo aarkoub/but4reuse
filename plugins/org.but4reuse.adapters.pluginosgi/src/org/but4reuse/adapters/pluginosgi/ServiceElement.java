@@ -28,13 +28,9 @@ public class ServiceElement extends FileElement {
 	@Override
 	public double similarity(IElement anotherElement) {
 		//if they implements the same interface
-		if (anotherElement instanceof ServiceElement) {
-			ServiceElement anotherServiceElement = ((ServiceElement) anotherElement);
-
-			// Same interface
-			if (this.interfaceName.equals(anotherServiceElement.interfaceName)) {
-				return 1;
-			}
+			// Same interface -> see redef of equals method
+		if (this.equals(anotherElement)) {
+			return 1;
 		}
 		return 0;
 	}
