@@ -22,7 +22,6 @@ import org.but4reuse.adapters.pluginosgi.PluginElement;
 import org.but4reuse.adapters.pluginosgi.ServiceElement;
 import org.but4reuse.adapters.pluginosgi.bytecode.parser.PluginsServiceParser;
 import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
-import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.AveragePluginElementStrategy;
 import org.but4reuse.adapters.pluginosgi.similarity.pluginelement.MinimalPluginElementStrategy;
 import org.but4reuse.utils.files.FileUtils;
 
@@ -53,6 +52,11 @@ public class PluginInfosExtractor {
 	private static String PATH = null;
 
 	private static ISimilarity strategy = new MinimalPluginElementStrategy();
+	
+	public static long parserBytecode =0 ;
+	public static long parserDS = 0;
+	public static long parserJava =0;
+	public static long extraction =0;
 	
 	
 	
@@ -128,7 +132,11 @@ public class PluginInfosExtractor {
 		PATH = plugin.getAbsolutePath();
 		if(PATH.endsWith(".jar")){
 			try {
+				long start = System.currentTimeMillis();
 				ZipExtractor.unZipAll(new File(PATH), new File(PATH.substring(0, PATH.length()-4)));
+				long end = System.currentTimeMillis();
+				//System.out.println("Extraction "+ (end-start));
+				extraction += (end-start);
 				PATH = PATH.substring(0, PATH.length()-4);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -150,7 +158,14 @@ public class PluginInfosExtractor {
 				if(f.exists()) {
 					List<ServiceElement> l = new ArrayList<>();
 					try {
+						long start= System.currentTimeMillis(); 
 						PluginsServiceParser.parsePluginClass(new FileInputStream(f), l);
+					    long end = System.currentTimeMillis(); 
+					    
+					 //   System.out.println("Parsing ByteCode"+ (end - start)); 
+						
+					    parserBytecode += (end -start);
+					    
 						nbservices += l.size();
 						for(ServiceElement selts: l) {
 							addPackagesFromByteCode(selts, plugin.getExport_packages());
@@ -167,7 +182,17 @@ public class PluginInfosExtractor {
 		
 		if(exhaustive) {
 			List<ServiceElement> l = new ArrayList<>();
+			
+			long start = System.currentTimeMillis();
+			
 			parseActivator(new File(PATH), plugin.getAbsolutePath(), l);
+			
+			long end = System.currentTimeMillis();
+			
+			//System.out.println("Parsing classe activator Java"+ (end - start));
+			
+			parserJava += (end-start);
+			
 			nbservices += l.size();
 			for(ServiceElement selts: l) {
 				List<String> itfs = new ArrayList<>();
@@ -187,12 +212,16 @@ public class PluginInfosExtractor {
 			
 			uri_xml = service_component.split(",\\s+|,");
 			
-			
+			long somme=0;
 			for(String uri : uri_xml){
 				//System.out.println(uri);
-				
+				long start = System.currentTimeMillis();
 				List<List<String>> infos = parserDS(uri);
+				long end = System.currentTimeMillis();
+				somme += (end-start);
 				String implClass = null;
+				
+				if(infos==null) continue;
 				
 				List<String> implClassList = infos.get(0);
 				if(!implClassList.isEmpty())
@@ -208,7 +237,9 @@ public class PluginInfosExtractor {
 				
 
 			}
+			//System.out.println("Parsing DS "+ somme);
 			
+			parserDS += somme;
 			//for(ServiceElement serv : p.getServices()) System.out.println(serv.getInterfaceName());
 			
 		}
@@ -470,14 +501,14 @@ public class PluginInfosExtractor {
 			
 			for(int i=0; i<list.length; i++){
 				if(list[i].endsWith(".xml")){
-					infos.addAll(XMLParser.getInformations(newPath+list[i]));
+					infos = XMLParser.getInformations(newPath+list[i]);
 				}
 			}
 			
 		}
 		else{
-		
-			infos.addAll(XMLParser.getInformations(PATH+uri));
+			
+			infos = XMLParser.getInformations(PATH+uri);
 		}
 		
 		

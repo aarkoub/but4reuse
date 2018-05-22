@@ -74,7 +74,7 @@ public class UMLComponentModelsExtractor {
 					String BlockURI = constructionURI+"/Block_"+i+"/";
 					directory = new File(BlockURI);
 					 directory.mkdirs();
-					UML.generateUMLDiagramThreshold(listElements, BlockURI+"Block"+i+"Uml_"+namePackageList, BlockURI+"Block"+i+"Uml_"+namePackageList, threshold);
+					UML.generateUMLDiagramThreshold(listElements, BlockURI+"Block"+i+"Uml_"+namePackageList, BlockURI+"Block"+i+"Uml_"+namePackageList, threshold, namePackageList);
 				}
 			}
 			

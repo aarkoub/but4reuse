@@ -92,11 +92,18 @@ public class XMLParser {
 		
 		Document doc;
 		try {
-			doc = docBuilder.parse(new File(path));
-			impl.add(getImplementationClass(doc));
-			infos.add(impl);
-			infos.add(getProvidedInterfaceNames(doc));
-			infos.add(getReferencedInterfaceNames(doc));
+			
+			File f = new File(path);
+			
+			if(f.canRead()){
+				doc = docBuilder.parse(new File(path));
+				impl.add(getImplementationClass(doc));
+				infos.add(impl);
+				infos.add(getProvidedInterfaceNames(doc));
+				infos.add(getReferencedInterfaceNames(doc));
+			}
+			else
+				return null;
 			
 		} catch (SAXException | IOException e) {
 			// TODO Auto-generated catch block

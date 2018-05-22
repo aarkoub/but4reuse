@@ -17,10 +17,10 @@ import net.sourceforge.plantuml.SourceStringReader;
 public class UML {
 	
 	private static FileWriter writer;
-	private static String [] tag = {"up", "left", "down" , "right"};
+	private static String [] tag = {"up", "left", "down" , ""};
 
 
-	private static String makeUMLDiagram(List<IElement> elements, String destPath){
+	private static String makeUMLDiagram(List<IElement> elements, String nomPackage, String destPath){
 		
 		StringBuilder sb = new StringBuilder();
 		int k=0;
@@ -28,6 +28,10 @@ public class UML {
 			writer = new FileWriter(new File(destPath));
 			writer.write("@startuml\n\n");
 			sb.append("@startuml\n\n");
+			
+			writer.write("package \""+nomPackage+"\" { \n");
+			sb.append("package \""+nomPackage+"\" { \n");
+			
 			for(IElement elem : elements){
 				if(elem instanceof PluginElement){
 					PluginElement plugElem = (PluginElement) elem;
@@ -66,6 +70,10 @@ public class UML {
 										
 				}
 			}
+			
+			writer.write("} \n");
+			sb.append("} \n");
+			
 			writer.write("\n@enduml");
 			sb.append("\n@enduml");
 		} catch (IOException e) {
@@ -86,9 +94,9 @@ public class UML {
 	}
 	
 	
-	public static void generateUMLDiagram(List<IElement> elements, String source, String pngDestination){
+	public static void generateUMLDiagram(List<IElement> elements, String source, String pngDestination, String nomPackage){
 		
-		String content = makeUMLDiagram(elements, source+".txt");
+		String content = makeUMLDiagram(elements, nomPackage, source+".txt");
 		
 		SourceStringReader reader = new SourceStringReader(content);
 		
@@ -104,7 +112,7 @@ public class UML {
 	}
 	
 	
-	public static void generateUMLDiagramThreshold(List<IElement> elements, String source, String pngDestination, int threshold){
+	public static void generateUMLDiagramThreshold(List<IElement> elements, String source, String pngDestination, int threshold, String nomPackage){
 		
 		int nb=0;
 		int j=0;
@@ -114,7 +122,7 @@ public class UML {
 		for(int i=0; i<elements.size(); i++){
 						
 			if(nb>=threshold){
-				generateUMLDiagram(elementsToConsider, source+"_"+j, pngDestination+"_"+j);
+				generateUMLDiagram(elementsToConsider, source+"_"+j, pngDestination+"_"+j, nomPackage);
 				nb=0;
 				j++;
 				elementsToConsider.clear();
@@ -131,7 +139,7 @@ public class UML {
 		}
 		
 		if( ! elementsToConsider.isEmpty()){
-			generateUMLDiagram(elementsToConsider, source+"_"+j, pngDestination+"_"+j);
+			generateUMLDiagram(elementsToConsider, source+"_"+j, pngDestination+"_"+j, nomPackage);
 		}
 		
 	

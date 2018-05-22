@@ -184,9 +184,11 @@ public class PluginsServiceParser {
 						case 183: // Invocation de méthode spéciale : MethodInsnNode
 							MethodInsnNode insm = (MethodInsnNode)ains;
 							if(insm.name.equals("<init>")) { // Appel de constructeur
-								TypeInsnNode inst = (TypeInsnNode)(insm.getPrevious().getPrevious()); // En cas d'instanciation avec new, il faut remonter deux instructions plus haut pour retrouver l'expression de Type utilisée
-								//System.out.println("\t Instantiation Type : "+inst.desc);
-								object = convertService(inst.desc);
+								if(insm.getPrevious().getPrevious() instanceof TypeInsnNode){
+									TypeInsnNode inst = (TypeInsnNode)(insm.getPrevious().getPrevious()); // En cas d'instanciation avec new, il faut remonter deux instructions plus haut pour retrouver l'expression de Type utilisée
+									//System.out.println("\t Instantiation Type : "+inst.desc);
+									object = convertService(inst.desc);
+								}
 								break;
 							}							
 						case 182: // Invocation de méthode : MethodInsnNode
@@ -228,8 +230,13 @@ public class PluginsServiceParser {
 						}
 						
 						if(itf != "" && object != ""){
-							lse.add(new ServiceElement(itf, object));
-							//System.out.println("ITF: "+itf+" OBJ: "+object);
+							String [] tmp = itf.split(" ");
+							if(tmp.length==1){
+								lse.add(new ServiceElement(itf, object));
+							}
+							else{
+								lse.add(new ServiceElement("", object));
+							}
 						}
 					}
 				}
