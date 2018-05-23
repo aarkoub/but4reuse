@@ -91,11 +91,13 @@ public class RegisterServiceParser {
 		for(MethodInvocation minvoc: invoclist){
 			@SuppressWarnings("unchecked")
 			List<Expression> args = minvoc.arguments();
-			String itf = findInterface(args.get(0), varmap);
-			String obj = findObj(args.get(1), varmap, assignmap, filepath);
-			//System.out.println("SERVICE: itf: "+itf+"\t obj: "+obj);
-			if(!itf.equals("") || !obj.equals("")) {
-				servelts.add(new ServiceElement(itf, obj));
+			if(args.size()>=2){
+				String itf = findInterface(args.get(0), varmap);
+				String obj = findObj(args.get(1), varmap, assignmap, filepath);
+				//System.out.println("SERVICE: itf: "+itf+"\t obj: "+obj);
+				if(!itf.equals("") || !obj.equals("")) {
+					servelts.add(new ServiceElement(itf, obj));
+				}
 			}
 			
 		}
