@@ -36,6 +36,12 @@ public class CreateComponentUMLAction implements IViewActionDelegate {
 			return;
 		}
 		String constructionURI = inputDialog.getValue();
+		if(constructionURI.endsWith("/")||constructionURI.endsWith("\\")){
+			constructionURI += "uml/";
+		}
+		else{
+			constructionURI += "/uml/";
+		}
 		AdaptedModel adaptedModel = AdaptedModelManager.getAdaptedModel();
 
 		inputDialog = new URISelectionDialog(Display.getCurrent().getActiveShell(),

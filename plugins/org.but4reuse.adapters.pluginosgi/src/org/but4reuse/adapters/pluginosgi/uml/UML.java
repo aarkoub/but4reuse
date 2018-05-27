@@ -101,7 +101,7 @@ public class UML {
 		SourceStringReader reader = new SourceStringReader(content);
 		
 		// Write the first image to "png"
-		File pngFile = new File(pngDestination+"png");
+		File pngFile = new File(pngDestination+".png");
 		try {
 			reader.outputImage(pngFile);
 		} catch (IOException e) {
@@ -200,7 +200,7 @@ public class UML {
 		SourceStringReader reader = new SourceStringReader(content);
 		
 		// Write the first image to "png"
-		File pngFile = new File(pngDestination+"png");
+		File pngFile = new File(pngDestination+".png");
 		try {
 			reader.outputImage(pngFile);
 		} catch (IOException e) {
