@@ -1,8 +1,9 @@
 package org.but4reuse.adapters.pluginosgi;
 
 import org.but4reuse.adapters.IElement;
+import org.but4reuse.adapters.impl.AbstractElement;
 
-public class ServiceElement extends FileElement {
+public class ServiceElement extends AbstractElement {
 	
 	private String interfaceName;
 	private String objName;
@@ -64,6 +65,13 @@ public class ServiceElement extends FileElement {
 			return this.objName.equals( ((ServiceElement) o).objName);
 		}
 		return this.interfaceName.equals( ((ServiceElement) o).interfaceName);
+	}
+
+	@Override
+	public String getText() {
+		if(isInterface)
+			return interfaceName;
+		return objName;
 	}
 
 }

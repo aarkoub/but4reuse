@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.but4reuse.adapters.IElement;
+import org.but4reuse.adapters.impl.AbstractElement;
 import org.but4reuse.adapters.pluginosgi.similarity.ISimilarity;
 import org.but4reuse.adapters.pluginosgi.similarity.packageelement.AveragePackageElementStrategy;
 
-public class PackageElement extends FileElement {
+public class PackageElement extends AbstractElement {
 	
 	private String name;
 	private List<ServiceElement> services = new ArrayList<>();
@@ -37,5 +38,11 @@ public class PackageElement extends FileElement {
 	@Override
 	public double similarity(IElement anotherElement) {
 		return strategy.similarity(this, anotherElement);
+	}
+
+	@Override
+	public String getText() {
+		
+		return name;
 	}
 }
